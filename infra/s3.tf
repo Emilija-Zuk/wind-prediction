@@ -1,7 +1,6 @@
-
 resource "aws_s3_bucket" "static_website" {
 
-  bucket = "www.wind-prediction.live"
+  bucket = "wind-prediction.live" 
   tags = {
     Name        = "My bucket"
     Environment = "Dev"
@@ -53,7 +52,7 @@ resource "aws_s3_bucket_cors_configuration" "cors" {
 
   cors_rule {
     allowed_methods = ["GET", "POST", "PUT"]
-    allowed_origins = ["http://www.wind-prediction.live.s3-website-ap-southeast-2.amazonaws.com", "http://www.wind-prediction.live"] 
+    allowed_origins = ["http://wind-prediction.live.s3-website-ap-southeast-2.amazonaws.com", "http://wind-prediction.live"] 
     allowed_headers = ["*"]
     expose_headers  = ["ETag"]
   }

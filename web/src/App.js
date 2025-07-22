@@ -10,9 +10,7 @@ function App() {
           
           <div className="description">
             <p>
-              Harness the power of artificial intelligence and machine learning to predict wind patterns 
-              with unprecedented accuracy. My advanced forecasting system combines historical weather data, 
-              real-time conditions, and ML algorithms to deliver reliable wind predictions.
+              This app was made for Gold Coast Seaway wind prediction, but you can be extended for any station. It’s a handy tool for kite surfers, surfers and sailors. It uses AI and machine learning to crunch past weather data and live updates, giving you reliable wind forecasts. No more guessing  – just check the app and get out on the water.
             </p>
             
             <div className="features-grid">
