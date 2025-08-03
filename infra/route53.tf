@@ -1,10 +1,9 @@
 resource "aws_route53_zone" "main" {
-  # Remove count - zone exists in both stages
   name = var.domain_name
 }
 
 output "route53_nameservers" {
-  value       = var.stage2 ? null : aws_route53_zone.main[0].name_servers
+  value       = var.stage2 ? null : aws_route53_zone.main.name_servers 
   description = "Route53 name servers"
 }
 

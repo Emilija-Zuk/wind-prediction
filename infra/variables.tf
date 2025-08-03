@@ -15,13 +15,13 @@ variable "alternate_names" {
 
 variable "stage2" {
   type    = bool
-  default = false  # true for stage 2, false for stage 1
+  default = true  # true for stage 2, false for stage 1
 }
 
 data "aws_route53_zone" "existing" {
   count        = var.stage2 ? 1 : 0
   name         = "${var.domain_name}."
-  private_zone = false  # Only look for public zones
+  private_zone = false 
 }
 
 data "aws_acm_certificate" "existing" {
@@ -33,6 +33,6 @@ data "aws_acm_certificate" "existing" {
 }
 
 locals {
-  cert_arn = aws_acm_certificate.cert.arn  # Always use same cert
-  zone_id = aws_route53_zone.main.zone_id  # Always use same zone
+  cert_arn = aws_acm_certificate.cert.arn 
+  zone_id = aws_route53_zone.main.zone_id 
 }

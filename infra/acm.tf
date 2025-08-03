@@ -9,14 +9,14 @@ resource "aws_acm_certificate" "cert" {
   }
 }
 
-# Move the existing certificate to the new resource without count
+# Move the existing certificate to the new resource 
 moved {
   from = aws_acm_certificate.cert[0]
   to   = aws_acm_certificate.cert
 }
 
 resource "aws_route53_record" "cert_validation" {
-  for_each = var.stage2 ? {} : {
+  for_each = {
     for dvo in aws_acm_certificate.cert.domain_validation_options : dvo.domain_name => {
       name  = dvo.resource_record_name
       type  = dvo.resource_record_type
@@ -24,7 +24,7 @@ resource "aws_route53_record" "cert_validation" {
     }
   }
 
-  zone_id = aws_route53_zone.main[0].zone_id
+  zone_id = aws_route53_zone.main.zone_id 
   name    = each.value.name
   type    = each.value.type
   records = [each.value.value]
@@ -34,6 +34,6 @@ resource "aws_route53_record" "cert_validation" {
 
 output "cert_arn" {
 
-  value       = var.stage2 ? null : aws_acm_certificate.cert.arn
+  value       = aws_acm_certificate.cert.arn
   description = "ACM certificate ARN for CloudFront"
 }
