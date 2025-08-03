@@ -1,60 +1,28 @@
-
-resource "aws_s3_bucket" "static_website" {
-
-  bucket = "www.wind-prediction.live"
-  tags = {
-    Name        = "My bucket"
-    Environment = "Dev"
-  }
+resource "aws_s3_bucket" "site" {
+  bucket = var.bucket_name
 }
 
-resource "aws_s3_bucket_public_access_block" "unblock" {
-  bucket = aws_s3_bucket.static_website.id
-
-  block_public_acls       = false
-  block_public_policy     = false
-  ignore_public_acls      = false
-  restrict_public_buckets = false
-
+resource "aws_s3_bucket_public_access_block" "block_all_public" {
+  bucket                  = aws_s3_bucket.site.id
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
 }
 
-resource "aws_s3_bucket_website_configuration" "website" {
-  bucket = aws_s3_bucket.static_website.id
-  index_document {
-    suffix = "index.html"
-  }
-
-}
-
-resource "aws_s3_bucket_policy" "static_website_policy" {
-  bucket = aws_s3_bucket.static_website.id
+resource "aws_s3_bucket_policy" "bucket_policy" {
+  count   = var.stage2 ? 1 : 0
+  bucket = aws_s3_bucket.site.id
 
   policy = jsonencode({
     Version = "2012-10-17"
-    Statement = [
-      {
-        Sid = "PublicReadGetObject"
-        Effect = "Allow"
-        Principal = "*"
-        Action = "s3:GetObject"
-        Resource = "${aws_s3_bucket.static_website.arn}/*"
+    Statement = [{
+      Effect    = "Allow"
+      Principal = {
+        AWS = aws_cloudfront_origin_access_identity.oai[0].iam_arn
       }
-    ]
+      Action   = "s3:GetObject"
+      Resource = "${aws_s3_bucket.site.arn}/*"
+    }]
   })
-
-  depends_on = [
-    aws_s3_bucket.static_website,
-    aws_s3_bucket_public_access_block.unblock
-  ]
-}
-
-resource "aws_s3_bucket_cors_configuration" "cors" {
-  bucket = aws_s3_bucket.static_website.id
-
-  cors_rule {
-    allowed_methods = ["GET", "POST", "PUT"]
-    allowed_origins = ["http://www.wind-prediction.live.s3-website-ap-southeast-2.amazonaws.com", "http://www.wind-prediction.live"] 
-    allowed_headers = ["*"]
-    expose_headers  = ["ETag"]
-  }
 }
