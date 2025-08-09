@@ -21,18 +21,20 @@ const App: React.FC = () => {
           <div className="description-content">
 
             <div >
-              <p>
-              This predicts wind at Gold Coast Seaway. Perfect for kite surfers, surfers, and sailors. 
-          
-          
-              </p>
+                <p>
+                This predicts wind at{' '}
+                <b>
+                   Gold Coast Seaway. 
+                </b>
+                 {' '} Perfect for kite surfers, surfers and sailors.
+                </p>
             </div>
             <div className='background'>
                 <div className='description2'>
                   <p>
                   Do you live far from your favourite kite spot? 
                
-                  The wind’s on — but will it stick around for the next few hours?
+                  The wind is ON! But will it stick around for the next few hours?
                   Is it worth the drive??
                   <br />
                   <br />
