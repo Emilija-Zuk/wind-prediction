@@ -1,6 +1,7 @@
+import React from 'react';
 import './App.css';
 
-function App() {
+const App: React.FC = () => {
   return (
     <div className="App">
       
@@ -21,18 +22,21 @@ function App() {
 
             <div >
               <p>
-              This app was designed for Gold Coast Seaway wind prediction, but it can be extended for any station. 
-              It’s a handy tool for kite surfers, surfers and sailors. 
-              It uses AI and machine learning to crunch past weather data and live updates
+              This predicts wind at Gold Coast Seaway. Perfect for kite surfers, surfers, and sailors. 
+          
           
               </p>
             </div>
             <div className='background'>
                 <div className='description2'>
                   <p>
-                  Do you live miles from your favourite kite spot? The weather forecast looks sweet — but will the wind actually stick around for the next few hours?
-                  Is it even worth the drive?
-                  Wind Prediction helps you make the call! Just check this and get out on the water yeew!
+                  Do you live far from your favourite kite spot? 
+               
+                  The wind’s on — but will it stick around for the next few hours?
+                  Is it worth the drive??
+                  <br />
+                  <br />
+                  Check here first, then get out on the water. Yeew!
                  
                   </p>
                 </div>
