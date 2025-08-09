@@ -1,5 +1,7 @@
-const reportWebVitals = onPerfEntry => {
-  if (onPerfEntry && onPerfEntry instanceof Function) {
+type PerformanceEntryCallback = (metric: any) => void;
+
+const reportWebVitals = (onPerfEntry: PerformanceEntryCallback) => {
+  if (typeof onPerfEntry === 'function') {
     import('web-vitals').then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
       getCLS(onPerfEntry);
       getFID(onPerfEntry);

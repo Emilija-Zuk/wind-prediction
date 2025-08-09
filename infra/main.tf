@@ -8,5 +8,11 @@ terraform {
 }
 
 provider "aws" {
-  region = "ap-southeast-2" 
+  region = "ap-southeast-2"  # default
+}
+
+# CloudFront requires certificates to be in us-east-1
+provider "aws" {
+  alias  = "us_east_1"
+  region = "us-east-1"
 }
