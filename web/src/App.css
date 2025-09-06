@@ -1,21 +1,14 @@
-.App {
+.app-container {
   text-align: center;
   min-height: 100vh;
-  color: #334155;
+  color: #1e293b;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   display: flex;
   justify-content: center;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
 }
 
-.logo{
-  align-self: flex-start;
-
-}
-.logo-image {
-  width: 150px;
-}
-
-.card {
+.main-container {
   width: 1240px;
   min-height: 100vh;
   display: flex;
@@ -26,146 +19,18 @@
 
 }
 
-.main-content {
-
-  
-}
-
-.main-title {
-  font-size: 4rem;
-  font-weight: 700;
-  margin-bottom: 0.5rem;
-  background: linear-gradient(45deg, #3e5ec7, #e0840c);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-shadow: 0 4px 8px rgba(30, 64, 175, 0.1);
-}
-
-.subtitle {
+.intro-text {
+  font-style: italic;
   font-size: 1.5rem;
-  font-weight: 300;
   margin-bottom: 3rem;
-  color: #64748b;
-  font-style: italic;
-}
-
-.description-content {
-  max-width: 820px;
-  margin: 0 auto;
-}
-
-.description-content > p {
-  font-size: 1.2rem;
-  line-height: 1.6;
-  margin-bottom: 3rem;
-  color: #475569;
-}
-
-.description2 {
-  font-style: italic;
-  font-size: 1.6rem;
-  margin-bottom: 4rem;
-}
-
-.features-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 2rem;
-  margin-bottom: 2rem;
-}
-
-.feature-card {
- 
-  background: white;
-  border-radius: 16px;
-  padding: 2rem;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 4px 6px rgba(59, 130, 246, 0.07);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.feature-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 30px rgba(59, 130, 246, 0.15);
-  border-color: #3b82f6;
-}
-
-.feature-card h3 {
-  font-size: 1.3rem;
-  margin-bottom: 1rem;
-  color: #1e40af;
-}
-
-.feature-card p {
-  font-size: 1rem;
-  color: #64748b;
+  color: #111827;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.9);
   line-height: 1.5;
+  font-weight: 400;
+  letter-spacing: 0.01em;
 }
 
-.button-section {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-  flex-wrap: wrap;
-  margin-top: auto;
-}
-
-.button {
-  font-family: 'Montserrat', 'Segoe UI', Arial, sans-serif;
-  padding: 1rem 2rem;
-  border: none;
-  border-radius: 10px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.button.primary {
-  color: white;
-  background-color: #f38d40;
-  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
-}
-
-.button.secondary {
-  background: white;
-  color: #3b82f6;
-  border: 1px solid #3b82f6;
-}
-
-.button:hover {
-  transform: translateY(-2px);
-}
-
-.button.primary:hover {
-  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
-}
-
-.button.secondary:hover {
-  background: #989faa;
-  color: white;
-}
-
-
-
-.ems-apps {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 0.75rem;
-  margin-top: 1rem;
-  margin-bottom: 2rem;
-  font-style: italic;
-}
-
-.ems-image {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-}
-
-.background::before {
+.background-section::before {
   content: '';
   position: absolute;
   top: 0;
@@ -176,14 +41,14 @@
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  opacity: 0.3;
+  opacity: 0.15;
   z-index: 0;
 }
 
-.background {
-  background-color: white;
+.background-section {
+  background: rgba(248, 250, 252, 0.4);
   position: relative;
-  aspect-ratio: 9 / 12;
+  aspect-ratio: 9 / 11;
   display: flex;
   flex-direction: column;
   justify-content: flex-start; 
@@ -192,45 +57,19 @@
   z-index: 1;
 }
 
-.background > * {
+.background-section > * {
   position: relative;
   z-index: 1;
 }
 
-
 @media (max-width: 768px) {
-  .background {
+  .background-section {
     aspect-ratio: unset;
     height: auto;
     min-height: unset;
   }
-  .main-title {
-    font-size: 2.5rem;
-  }
   
-  .subtitle {
-    font-size: 1.2rem;
-  }
+
   
-  .description > p {
-    font-size: 1rem;
-  }
   
-  .features-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-  
-  .feature-card {
-    padding: 1.5rem;
-  }
-  
-  .button-section {
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .button {
-    width: 200px;
-  }
 }

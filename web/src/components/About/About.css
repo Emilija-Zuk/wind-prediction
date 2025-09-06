@@ -1,0 +1,16 @@
+.about-ems {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  margin-bottom: 2rem;
+  font-style: italic;
+  color: #475569;
+}
+
+.ems-img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+}
