@@ -11,6 +11,8 @@ web/coverage
 # production
 web/build
 
+web/todo
+
 # misc
 web/.DS_Store
 web/.env.local

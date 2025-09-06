@@ -1,0 +1,31 @@
+<svg width="300" height="80" xmlns="http://www.w3.org/2000/svg">
+  <!-- Smartphone icon -->
+  <rect x="10" y="10" width="40" height="60" rx="8" ry="8" stroke="#5A8DEE" stroke-width="3" fill="none" />
+  <circle cx="30" cy="65" r="3" fill="#5A8DEE" />
+  
+  <!-- Text -->
+  <text x="60" y="45" font-family="Poppins, sans-serif" font-weight="600" font-size="36" fill="#5A8DEE">Em’s</text>
+  <text x="150" y="45" font-family="Poppins, sans-serif" font-weight="600" font-size="36" fill="#C47F4B">Apps</text>
+</svg>
+
+
+<svg width="300" height="80" xmlns="http://www.w3.org/2000/svg">
+  <!-- Smartphone icon -->
+  <rect x="10" y="10" width="40" height="60" rx="8" ry="8" stroke="#5A8DEE" stroke-width="3" fill="none" />
+  <circle cx="30" cy="65" r="3" fill="#5A8DEE" />
+  
+  <!-- Text -->
+  <text x="60" y="45" font-family="Poppins, sans-serif" font-weight="600" font-size="36" fill="#5A8DEE">Em’s</text>
+  <text x="150" y="45" font-family="Poppins, sans-serif" font-weight="600" font-size="36" fill="#FF0000">Apps</text>
+</svg>
+
+<svg width="300" height="80" xmlns="http://www.w3.org/2000/svg">
+  <!-- Smartphone icon -->
+  <rect x="10" y="10" width="40" height="60" rx="8" ry="8" stroke="#0F172A" stroke-width="3" fill="none" />
+  <circle cx="30" cy="65" r="3" fill="#0F172A" />
+  
+  <!-- Text -->
+  <text x="60" y="45" font-family="Poppins, sans-serif" font-weight="600" font-size="36" fill="#0F172A">Em’s</text>
+  <text x="150" y="45" font-family="Poppins, sans-serif" font-weight="600" font-size="36" fill="#94A3B8">Apps</text>
+</svg>
+
