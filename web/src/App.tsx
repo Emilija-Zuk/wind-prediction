@@ -15,16 +15,19 @@ const App: React.FC = () => {
         <div className="main-section">
           <Intro />
           <div className="background-section">
-
-            <Features />
-                        <div className="intro-text">
               <p>
-                Do you live far from your favourite kite spot?
+                Predict wind at <b>Gold Coast Seaway.</b> Perfect for kite surfers, surfers
+                and sailors.
+              </p>
+            <Features />
+              <div className="intro-text">
+              <p>
+                Do you live far from your <b>favourite kite spot?</b>
                 <br />
-                The wind is ON! But will it stick around for the next few hours?  
-                Is it worth the drive??
+                The wind is <b>on!</b> But will it <em>stay</em> for the next few hours?  
+                Is it <b>worth the drive??</b>
                 <br /><br />
-                Check here first, then get out on the water. Yeew!
+                <strong>Check here first</strong>, then get out on the water. Yeew!
               </p>
             </div>
             <Buttons />
