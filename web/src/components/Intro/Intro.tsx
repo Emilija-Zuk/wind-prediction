@@ -6,10 +6,7 @@ const Intro: React.FC = () => (
     <h1 className="title-main">Wind Prediction</h1>
     <h2 className="title-sub">Forecasting the winds ahead</h2>
 
-    <p>
-      Predict wind at <b>Gold Coast Seaway.</b> Perfect for kite surfers, surfers
-      and sailors.
-    </p>
+
   </div>
 );
 

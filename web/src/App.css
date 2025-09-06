@@ -30,6 +30,17 @@
   letter-spacing: 0.01em;
 }
 
+.intro-text b, .intro-text strong {
+  color: #0f172a;
+  font-weight: 600;
+  text-shadow: none;
+}
+
+.intro-text em {
+  color: #0891b2;
+  font-weight: 500;
+}
+
 .background-section::before {
   content: '';
   position: absolute;
@@ -62,6 +73,12 @@
   z-index: 1;
 }
 
+p {
+
+  font-size: 1.2rem;
+  line-height: 1.2;
+
+}
 @media (max-width: 768px) {
   .background-section {
     aspect-ratio: unset;
