@@ -1,7 +1,7 @@
 import React from "react";
 import "./App.css";
 
-import Logo from "./components/Logo/Logo";
+import Navigation from "./components/Navigation/Navigation";
 import Intro from "./components/Intro/Intro";
 import SubText from "./components/SubText/SubText";
 import Features from "./components/Features/Features";
@@ -13,8 +13,7 @@ const App: React.FC = () => {
   return (
     <div className="app-container">
       <div className="main-container">
-        {/* todonav bar */}
-        <Logo />
+        <Navigation />
         <div className="main-section">
           <Intro />
           <div className="background-section">
