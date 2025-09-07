@@ -1,58 +1,68 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import "./Navigation.css";
 
 const Navigation: React.FC = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
   };
-
-  const menuItems = [
-    { label: "Predictions", href: "#predictions" },
-    { label: "Historical Data", href: "#historical" },
-    { label: "About", href: "#about" }
-  ];
 
   return (
     <nav className="navigation">
-      {/* Logo */}
       <div className="nav-logo">
-        <img src="/images/logo.png" alt="Em" className="logo-img" />
+        <Link to="/">
+          <img src="/images/logo.png" alt="Em's Apps Logo" className="logo-img" />
+        </Link>
       </div>
 
-      {/* Desktop Menu */}
+      {/* Desktop Navigation */}
       <div className="nav-desktop">
-        {menuItems.map((item, index) => (
-          <a key={index} href={item.href} className="nav-link">
-            {item.label}
-          </a>
-        ))}
+        <Link to="/predictions" className="nav-link">
+          Predictions
+        </Link>
+        <Link to="/historical-data" className="nav-link">
+          Historical Data
+        </Link>
+        <Link to="/about" className="nav-link">
+          About
+        </Link>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Navigation */}
       <div className="nav-mobile">
-        <button 
-          className={`hamburger ${isMenuOpen ? 'active' : ''}`}
-          onClick={toggleMenu}
-          aria-label="Toggle menu"
+        <button
+          className={`hamburger ${isMobileMenuOpen ? "active" : ""}`}
+          onClick={toggleMobileMenu}
         >
-          <span className="hamburger-line"></span>
-          <span className="hamburger-line"></span>
-          <span className="hamburger-line"></span>
+          <div className="hamburger-line"></div>
+          <div className="hamburger-line"></div>
+          <div className="hamburger-line"></div>
         </button>
 
-        <div className={`mobile-dropdown ${isMenuOpen ? 'open' : ''}`}>
-          {menuItems.map((item, index) => (
-            <a 
-              key={index} 
-              href={item.href} 
-              className="mobile-nav-link"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              {item.label}
-            </a>
-          ))}
+        <div className={`mobile-dropdown ${isMobileMenuOpen ? "open" : ""}`}>
+          <Link
+            to="/predictions"
+            className="mobile-nav-link"
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            Predictions
+          </Link>
+          <Link
+            to="/historical-data"
+            className="mobile-nav-link"
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            Historical Data
+          </Link>
+          <Link
+            to="/about"
+            className="mobile-nav-link"
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            About
+          </Link>
         </div>
       </div>
     </nav>
