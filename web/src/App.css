@@ -5,7 +5,7 @@
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   display: flex;
   justify-content: center;
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  background: linear-gradient(to bottom, #fafbfc 0%, #ffffff 100%);
 }
 
 .main-container {
@@ -16,29 +16,8 @@
   align-items: center;
   overflow: hidden;
   justify-content: center;
+  
 
-}
-
-.intro-text {
-  font-style: italic;
-  font-size: 1.5rem;
-  margin-bottom: 3rem;
-  color: #111827;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.9);
-  line-height: 1.5;
-  font-weight: 400;
-  letter-spacing: 0.01em;
-}
-
-.intro-text b, .intro-text strong {
-  color: #0f172a;
-  font-weight: 600;
-  text-shadow: none;
-}
-
-.intro-text em {
-  color: #0891b2;
-  font-weight: 500;
 }
 
 .background-section::before {

@@ -1,9 +1,11 @@
 import React from "react";
 import "./App.css";
 
-import Logo from "./components/Logo/Logo";
+import Navigation from "./components/Navigation/Navigation";
 import Intro from "./components/Intro/Intro";
+import SubText from "./components/SubText/SubText";
 import Features from "./components/Features/Features";
+import IntroText from "./components/IntroText/IntroText";
 import Buttons from "./components/Buttons/Buttons";
 import About from "./components/About/About";
 
@@ -11,25 +13,13 @@ const App: React.FC = () => {
   return (
     <div className="app-container">
       <div className="main-container">
-        <Logo />
+        <Navigation />
         <div className="main-section">
           <Intro />
           <div className="background-section">
-              <p>
-                Predict wind at <b>Gold Coast Seaway.</b> Perfect for kite surfers, surfers
-                and sailors.
-              </p>
+            <SubText />
             <Features />
-              <div className="intro-text">
-              <p>
-                Do you live far from your <b>favourite kite spot?</b>
-                <br />
-                The wind is <b>on!</b> But will it <em>stay</em> for the next few hours?  
-                Is it <b>worth the drive??</b>
-                <br /><br />
-                <strong>Check here first</strong>, then get out on the water. Yeew!
-              </p>
-            </div>
+            <IntroText />
             <Buttons />
           </div>
           <About />
