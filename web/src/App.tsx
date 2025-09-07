@@ -13,28 +13,18 @@ const ScrollToTop = () => {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    // Multiple scroll methods for Chrome mobile compatibility
-    const scrollToTopImmediately = () => {
+    // Nuclear option for Chrome mobile app
+    if (typeof window !== 'undefined' && 'scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+    
+    // Force immediate scroll
+    window.scrollTo(0, 0);
+    
+    // Chrome app specific hack
+    requestAnimationFrame(() => {
       window.scrollTo(0, 0);
-      document.documentElement.scrollTop = 0;
-      document.body.scrollTop = 0;
-      
-      // Force Chrome mobile to scroll
-      if (window.pageYOffset !== 0) {
-        document.body.style.transform = 'translateY(0)';
-        void document.body.offsetHeight; // Force reflow - fixed the error
-        document.body.style.transform = '';
-      }
-    };
-
-    // Execute immediately
-    scrollToTopImmediately();
-    
-    // Chrome mobile backup - execute after a short delay
-    setTimeout(scrollToTopImmediately, 50);
-    
-    // Final backup for stubborn Chrome mobile
-    setTimeout(scrollToTopImmediately, 150);
+    });
     
   }, [pathname]);
 
