@@ -151,11 +151,11 @@
   }
   
   .nav-logo .logo-img {
-    /* Keep it within 60px nav height but make it as big as possible */
-    height: 55px !important;
-    min-height: 55px !important;
+    
+    height: 45px !important;
+    min-height: 45px !important;
     width: auto;
   }
   
-  /* Keep navigation height at 60px - no changes needed */
+ 
 }
