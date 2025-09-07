@@ -150,9 +150,7 @@
     display: block;
   }
   .nav-logo .logo-img {
-    height: 13vw;
-    min-height: 50px;
-    max-height: 150px;
+    height: 150px;
     width: auto;
   }
 }
