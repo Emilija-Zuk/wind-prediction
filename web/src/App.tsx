@@ -1,31 +1,28 @@
 import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import "./App.css";
 
 import Navigation from "./components/Navigation/Navigation";
-import Intro from "./components/Intro/Intro";
-import SubText from "./components/SubText/SubText";
-import Features from "./components/Features/Features";
-import IntroText from "./components/IntroText/IntroText";
-import Buttons from "./components/Buttons/Buttons";
-import About from "./components/About/About";
+import Home from "./pages/Home/Home";
+import Predictions from "./pages/Predictions/Predictions";
+import HistoricalData from "./pages/HistoricalData/HistoricalData";
+import About from "./pages/About/About";
 
 const App: React.FC = () => {
   return (
-    <div className="app-container">
-      <div className="main-container">
-        <Navigation />
-        <div className="main-section">
-          <Intro />
-          <div className="background-section">
-            <SubText />
-            <Features />
-            <IntroText />
-            <Buttons />
-          </div>
-          <About />
+    <Router>
+      <div className="app-container">
+        <div className="main-container">
+          <Navigation />
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/predictions" element={<Predictions />} />
+            <Route path="/historical-data" element={<HistoricalData />} />
+            <Route path="/about" element={<About />} />
+          </Routes>
         </div>
       </div>
-    </div>
+    </Router>
   );
 };
 
