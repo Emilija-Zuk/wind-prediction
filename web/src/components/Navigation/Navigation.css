@@ -149,6 +149,9 @@
   .nav-mobile {
     display: block;
   }
+  .nav-logo .logo-img {
+    height: 70px;
+  }
 }
 
 @media (min-width: 769px) {
@@ -159,4 +162,5 @@
   .nav-mobile {
     display: none;
   }
+
 }
