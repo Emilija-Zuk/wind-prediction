@@ -150,8 +150,20 @@
     display: block;
   }
   .nav-logo .logo-img {
-    height: 150px;
+    height: 13vw;
+    min-height: 50px;  /* Increase minimum for Chrome */
+    max-height: 150px;
     width: auto;
+    
+    /* Chrome mobile specific fix */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+  }
+}
+@media (max-width: 768px) and (-webkit-min-device-pixel-ratio: 2) {
+  .nav-logo .logo-img {
+    height: 15vw !important; /* Bigger for Chrome mobile high-DPI screens */
+    min-height: 70px !important;
   }
 }
 

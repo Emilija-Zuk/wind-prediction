@@ -13,7 +13,17 @@ const ScrollToTop = () => {
   const { pathname } = useLocation();
 
   useEffect(() => {
+    // Standard method (works in Safari)
     window.scrollTo(0, 0);
+    
+    // Chrome mobile needs these additional lines
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+    
+    // Extra fallback for Chrome mobile
+    setTimeout(() => {
+      window.scrollTo(0, 0);
+    }, 10);
   }, [pathname]);
 
   return null;
