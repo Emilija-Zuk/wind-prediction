@@ -25,8 +25,14 @@ const ScrollToTop = () => {
     requestAnimationFrame(() => {
       window.scrollTo(0, 0);
     });
+
+      setTimeout(() => {
+      window.scrollTo(0, 0);
+    }, 50);
     
   }, [pathname]);
+
+
 
   return null;
 };
@@ -35,6 +41,7 @@ const App: React.FC = () => {
   return (
     <Router>
       <ScrollToTop />
+  
       <div className="app-container">
         <div className="main-container">
           <Navigation />
