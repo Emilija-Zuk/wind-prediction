@@ -1,152 +1,161 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
 import "./Predictions.css";
 import currentData from "../../assets/data/current.json";
 
 const Predictions: React.FC = () => {
-  const svgRef = useRef<SVGSVGElement>(null);
+  const yAxisRef = useRef<SVGSVGElement>(null);
+  const chartRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    if (!svgRef.current || !containerRef.current) return;
+    const checkResize = () => setIsMobile(window.innerWidth <= 900);
+    checkResize();
+    window.addEventListener('resize', checkResize);
+    return () => window.removeEventListener('resize', checkResize);
+  }, []);
 
-    // Clear previous chart
-    d3.select(svgRef.current).selectAll("*").remove();
+  useEffect(() => {
+    if (!yAxisRef.current || !chartRef.current || !containerRef.current) return;
 
-    // Get container width
+    d3.select(yAxisRef.current).selectAll("*").remove();
+    d3.select(chartRef.current).selectAll("*").remove();
+
     const containerWidth = containerRef.current.offsetWidth;
-    
-    // Chart dimensions
-    const margin = { top: 40, right: 40, bottom: 60, left: 70 };
-    const width = containerWidth - margin.left - margin.right - 64;
-    const height = 300 - margin.top - margin.bottom;
+    const margin = { top: 40, right: 20, bottom: 60, left: 50 };
+    const width = containerWidth - margin.left - margin.right;
+    const height = 200;
 
-    // Create SVG
-    const svg = d3.select(svgRef.current)
-      .attr("width", width + margin.left + margin.right)
-      .attr("height", height + margin.top + margin.bottom)
-      .attr("viewBox", `0 0 ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`)
-      .attr("preserveAspectRatio", "xMidYMid meet");
-
-    const g = svg.append("g")
-      .attr("transform", `translate(${margin.left},${margin.top})`);
-
-    // Parse time and prepare data
     const parseTime = d3.timeParse("%H:%M");
-    const allData = currentData.data.map(d => ({
+    const data = currentData.data.map(d => ({
       time: parseTime(d.x)!,
-      windSpeed: d.y,
-      timeString: d.x
+      windSpeed: d.y
     }));
 
-    // Get last 12 hours of data
-    const last12HoursData = allData.slice(-72);
+    const recentData = data.slice(-72);
+    const chartWidth = isMobile ? width * 2.5 : width;
 
-    // Set scales
     const xScale = d3.scaleTime()
-      .domain(d3.extent(last12HoursData, d => d.time) as [Date, Date])
-      .range([0, width]);
+      .domain(d3.extent(recentData, d => d.time) as [Date, Date])
+      .range([0, chartWidth]);
 
     const yScale = d3.scaleLinear()
       .domain([0, 30])
       .range([height, 0]);
 
-    // Create line
-    const line = d3.line<{ time: Date; windSpeed: number; timeString: string }>()
-      .x(d => xScale(d.time))
-      .y(d => yScale(d.windSpeed))
-      .curve(d3.curveMonotoneX);
+    // Y-axis setup
+    const yAxis = d3.select(yAxisRef.current)
+      .attr("width", margin.left)
+      .attr("height", height + margin.top + margin.bottom);
 
-    // X axis with hourly labels
-    const formatTime = d3.timeFormat("%H:%M");
-    g.append("g")
-      .attr("transform", `translate(0,${height})`)
-      .call(d3.axisBottom(xScale)
-        .tickFormat((d) => formatTime(d as Date))
-        .ticks(d3.timeHour.every(1))
-        .tickSize(6));
+    const yGroup = yAxis.append("g")
+      .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    // Small ticks every 10 minutes
-    g.append("g")
-      .attr("transform", `translate(0,${height})`)
-      .call(d3.axisBottom(xScale)
-        .tickFormat(() => "")
-        .ticks(d3.timeMinute.every(10))
-        .tickSize(3))
-      .selectAll("text").remove();
+    yGroup.append("g")
+      .call(d3.axisLeft(yScale).tickValues([0, 5, 10, 15, 20, 25, 30]));
 
-    // Y axis every 5 knots
-    g.append("g")
-      .call(d3.axisLeft(yScale)
-        .ticks(6)
-        .tickValues([0, 5, 10, 15, 20, 25, 30]));
-
-    // Axis labels
-    g.append("text")
-      .attr("transform", `translate(${width / 2}, ${height + margin.bottom - 10})`)
-      .style("text-anchor", "middle")
-      .style("font-size", "14px")
-      .text("Time (Last 12 Hours)");
-
-    g.append("text")
+    yGroup.append("text")
       .attr("transform", "rotate(-90)")
-      .attr("y", 0 - margin.left + 20)
-      .attr("x", 0 - (height / 2))
+      .attr("y", -35)
+      .attr("x", -height / 2)
       .style("text-anchor", "middle")
       .style("font-size", "14px")
       .text("Wind Speed (knots)");
 
-    // Draw the line
-    g.append("path")
-      .datum(last12HoursData)
+    // Main chart setup
+    const chart = d3.select(chartRef.current)
+      .attr("width", chartWidth)
+      .attr("height", height + margin.top + margin.bottom);
+
+    const chartGroup = chart.append("g")
+      .attr("transform", `translate(0,${margin.top})`);
+
+    const line = d3.line<{ time: Date; windSpeed: number }>()
+      .x(d => xScale(d.time))
+      .y(d => yScale(d.windSpeed))
+      .curve(d3.curveMonotoneX);
+
+    // X-axis
+    chartGroup.append("g")
+      .attr("transform", `translate(0,${height})`)
+      .call(d3.axisBottom(xScale)
+        .tickFormat(d => d3.timeFormat("%H:%M")(d as Date))
+        .ticks(d3.timeHour.every(1)));
+
+    // chartGroup.append("text")
+    //   .attr("x", chartWidth / 2)
+    //   .attr("y", height + 45)
+    //   .style("text-anchor", "middle")
+    //   .style("font-size", "14px")
+    //   .text("Time");
+
+    // Grid lines
+    chartGroup.append("g")
+      .call(d3.axisBottom(xScale)
+        .tickSize(-height)
+        .tickFormat(() => "")
+        .ticks(d3.timeHour.every(1)))
+      .attr("transform", `translate(0,${height})`)
+      .style("stroke-dasharray", "3,3")
+      .style("opacity", 0.3);
+
+    chartGroup.append("g")
+      .call(d3.axisLeft(yScale)
+        .tickSize(-chartWidth)
+        .tickFormat(() => "")
+        .tickValues([0, 5, 10, 15, 20, 25, 30]))
+      .style("stroke-dasharray", "3,3")
+      .style("opacity", 0.3);
+
+    // Draw line and dots
+    chartGroup.append("path")
+      .datum(recentData)
       .attr("fill", "none")
       .attr("stroke", "#2563eb")
       .attr("stroke-width", 3)
       .attr("d", line);
 
-    // Add dots
-    g.selectAll(".dot")
-      .data(last12HoursData.filter((_, i) => i % 6 === 0))
+    chartGroup.selectAll(".dot")
+      .data(recentData.filter((_, i) => i % 6 === 0))
       .enter().append("circle")
-      .attr("class", "dot")
       .attr("cx", d => xScale(d.time))
       .attr("cy", d => yScale(d.windSpeed))
       .attr("r", 4)
       .attr("fill", "#2563eb");
 
-    // Grid lines
-    g.append("g")
-      .attr("class", "grid")
-      .attr("transform", `translate(0,${height})`)
-      .call(d3.axisBottom(xScale)
-        .tickSize(-height)
-        .tickFormat(() => "")
-        .ticks(d3.timeHour.every(1))
-      )
-      .style("stroke-dasharray", "3,3")
-      .style("opacity", 0.3);
+    // Auto-scroll on mobile
+    if (isMobile && scrollRef.current) {
+      setTimeout(() => {
+        if (scrollRef.current) {
+          scrollRef.current.scrollLeft = chartWidth - width;
+        }
+      }, 100);
+    }
 
-    g.append("g")
-      .attr("class", "grid")
-      .call(d3.axisLeft(yScale)
-        .tickSize(-width)
-        .tickFormat(() => "")
-        .tickValues([0, 5, 10, 15, 20, 25, 30])
-      )
-      .style("stroke-dasharray", "3,3")
-      .style("opacity", 0.3);
-
-  }, []);
+  }, [isMobile]);
 
   return (
     <div className="predictions-page">
       <div className="page-content">
         <h1>Current Wind</h1>
-        <p className="chart-subtitle">
-          Date: {currentData.metadata.date} 
-        </p>
-        <div className="chart-container" ref={containerRef}>
-          <svg ref={svgRef}></svg>
+        <p className="chart-subtitle">Date: {currentData.metadata.date}</p>
+
+        <div className={`chart-container ${isMobile ? 'mobile-chart' : ''}`} ref={containerRef}>
+          <div style={{ display: 'flex' }}>
+            <svg ref={yAxisRef} style={{ flexShrink: 0 }}></svg>
+            <div 
+              ref={scrollRef}
+              style={{ 
+                overflowX: isMobile ? 'auto' : 'hidden',
+                overflowY: 'hidden',
+                flexGrow: 1
+              }}
+            >
+              <svg ref={chartRef}></svg>
+            </div>
+          </div>
         </div>
       </div>
     </div>

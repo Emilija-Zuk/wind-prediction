@@ -1,0 +1,179 @@
+CHROME MOBILE SCROLL TO TOP ISSUE - ATTEMPTED SOLUTIONS
+=======================================================
+
+PROBLEM: When navigating between pages on Chrome mobile app, page doesn't scroll to top. 
+Works fine on Safari mobile and desktop browsers, but Chrome mobile stays at previous scroll position.
+
+SOLUTIONS ATTEMPTED (ALL FAILED ON CHROME MOBILE):
+================================================================
+
+1. BASIC SCROLL TO TOP
+   - Simple window.scrollTo(0, 0) on pathname change
+   - Works on Safari, fails on Chrome mobile
+
+2. MULTIPLE SCROLL METHODS
+   useEffect(() => {
+     window.scrollTo(0, 0);
+     document.documentElement.scrollTop = 0;
+     document.body.scrollTop = 0;
+   }, [pathname]);
+
+3. TIMING-BASED SOLUTIONS
+   - setTimeout with 0ms, 10ms, 50ms, 100ms delays
+   - requestAnimationFrame approach
+   - Multiple setTimeout calls
+   
+4. OVERFLOW HACK WITH REFLOW
+   useEffect(() => {
+     window.scrollTo(0, 0);
+     document.body.style.overflow = "hidden";
+     void document.body.offsetHeight; // force reflow
+     document.body.style.overflow = "";
+   }, [pathname]);
+
+5. HISTORY SCROLL RESTORATION
+   window.history.scrollRestoration = 'manual';
+   Combined with window.scrollTo(0, 0)
+
+6. REACT ROUTER SCROLLRESTORATION COMPONENT
+   <ScrollRestoration getKey={(location) => location.pathname} />
+   - Only works with createBrowserRouter, not BrowserRouter
+   - Tried with both router types
+
+7. TRANSFORM HACK
+   document.body.style.transform = 'translateY(0)';
+   void document.body.offsetHeight;
+   document.body.style.transform = '';
+
+8. FOCUS ELEMENT TRICK
+   - Created invisible focusable element at top
+   - Focused element to force scroll
+   - Clean up after timeout
+
+9. CHROME MOBILE SPECIFIC DETECTION
+   - Browser detection for Chrome mobile
+   - Different scroll methods for Chrome vs other browsers
+   - Address bar collapse workaround (scrollTo(0,1) then scrollTo(0,0))
+
+10. COMPONENT KEY REMOUNTING
+    <div className="main-container" key={pathname}>
+    - Forces complete component remount on route change
+
+11. NUCLEAR DOM MANIPULATION
+    container.style.display = 'none';
+    container.offsetHeight; // force reflow
+    container.style.display = 'flex';
+
+12. CSS-ONLY SOLUTIONS
+    - scroll-behavior: auto !important
+    - CSS animations to reset scroll
+    - Overflow properties on containers
+
+13. ROUTER STRUCTURE CHANGES
+    - Switched from BrowserRouter to createBrowserRouter
+    - Nested routes with Layout component and Outlet
+    - Different route configurations
+
+14. AGGRESSIVE MULTI-METHOD APPROACH
+    - Combined multiple scroll methods with different timings
+    - Multiple setTimeout calls with progressive delays
+    - Resize event dispatching
+
+15. WINDOW SCROLL WITH BEHAVIOR PROPERTY (ADDED)
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+
+16. HASH NAVIGATION TRICK (ADDED)
+    window.location.hash = '#top';
+    setTimeout(() => {
+      window.location.hash = '';
+      window.scrollTo(0, 0);
+    }, 10);
+
+17. SCROLL ALL ELEMENTS APPROACH (ADDED)
+    const scrollElements = document.querySelectorAll('*');
+    scrollElements.forEach(el => {
+      if (el.scrollTop > 0) {
+        el.scrollTop = 0;
+      }
+    });
+
+ROUTER CONFIGURATIONS TESTED:
+============================
+
+A) BrowserRouter with custom ScrollToTop component
+B) createBrowserRouter with ScrollRestoration
+C) createBrowserRouter with custom ScrollToTop + Layout component
+D) Nested routes with Outlet pattern
+
+CSS MODIFICATIONS ATTEMPTED:
+============================
+- Removed overflow: hidden from containers
+- Added scroll-behavior: auto
+- Modified main-container positioning
+- Added/removed position relative/absolute properties
+- Checked Navigation CSS for z-index conflicts
+- Modified .background-section overflow properties
+
+BROWSER BEHAVIOR NOTES:
+======================
+- Safari mobile: Works with simple window.scrollTo(0, 0)
+- Desktop Chrome: Works with simple solution
+- Chrome mobile: Ignores ALL scroll commands, seems to cache scroll position
+- Chrome incognito: Same behavior as regular Chrome mobile
+- Back button navigation: Works correctly (scrolls to top)
+- Programmatic navigation (Link clicks): Fails to scroll
+- Address bar position difference: Chrome (top) vs Safari (bottom) may affect viewport
+
+CURRENT STATUS: UNRESOLVED
+=========================
+No working solution found for Chrome mobile app. Issue appears to be a known Chrome mobile bug 
+where the browser caches scroll position and ignores programmatic scroll commands during 
+route transitions. Many developers report this same issue with no reliable fix.
+
+POSSIBLE WORKAROUNDS (NOT IMPLEMENTED):
+======================================
+1. Accept the behavior (many production sites have this issue)
+2. Use hash routing instead of browser routing
+3. Force full page refresh on navigation
+4. Switch to different framework (Next.js may handle better)
+5. Use different routing library
+
+LAST ATTEMPTED SOLUTION:
+=======================
+const Layout = () => {
+  const { pathname } = useLocation();
+  const containerRef = useRef<HTMLDivElement>(null);
+  
+  useEffect(() => {
+    const container = containerRef.current;
+    if (container) {
+      container.scrollTop = 0;
+      window.scrollTo(0, 0);
+      document.body.scrollTop = 0;
+      document.documentElement.scrollTop = 0;
+      
+      // Nuclear option: temporarily hide and show container
+      container.style.display = 'none';
+      container.offsetHeight; // force reflow
+      container.style.display = 'flex';
+      
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+        container.scrollTop = 0;
+      }, 1);
+    }
+  }, [pathname]);
+  
+  return (
+    <div className="app-container">
+      <div className="main-container" ref={containerRef} key={pathname}>
+        <Navigation />
+        <Outlet />
+      </div>
+    </div>
+  );
+};
+
+RESULT: Still does not work on Chrome mobile app.
+
+CONCLUSION: This appears to be an unsolvable Chrome mobile browser bug that affects many developers.
