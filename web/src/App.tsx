@@ -19,15 +19,26 @@ const ScrollToTop = () => {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    const scrollToTop = () => {
-      window.scrollTo(0, 0);     
-      document.body.style.overflow = "hidden";  // lock scrolling
-      void document.body.offsetHeight;          // force reflow to flush queue
-      document.body.style.overflow = "";        // unlock scrolling
-    };
+    window.scrollTo(0, 0);
+    const focusElement = document.createElement("button");
+    focusElement.style.position = "absolute";
+    focusElement.style.top = "-10px";
+    focusElement.style.left = "0";
+    focusElement.style.width = "1px";
+    focusElement.style.height = "1px";
+    focusElement.style.opacity = "0";
+    focusElement.style.pointerEvents = "none";
+    focusElement.setAttribute("aria-hidden", "true");
 
-    scrollToTop();
-    
+    document.body.insertBefore(focusElement, document.body.firstChild);
+    focusElement.focus();
+
+    // Clean up immediately
+    setTimeout(() => {
+      if (document.body.contains(focusElement)) {
+        document.body.removeChild(focusElement);
+      }
+    }, 50);
   }, [pathname]);
 
   return null;
