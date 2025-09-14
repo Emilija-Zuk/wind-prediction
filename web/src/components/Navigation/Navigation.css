@@ -19,7 +19,7 @@
 }
 
 .nav-logo .logo-img {
-  height: 50px;
+  height: 40px;
   width: auto;
 }
 
@@ -152,8 +152,8 @@
   
   .nav-logo .logo-img {
     
-    height: 45px !important;
-    min-height: 45px !important;
+    height: 40px !important;
+    min-height: 40px !important;
     width: auto;
   }
   
