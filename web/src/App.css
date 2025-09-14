@@ -6,9 +6,6 @@
   display: flex;
   justify-content: center;
   background: linear-gradient(to bottom, #fafbfc 0%, #ffffff 100%);
-  position: relative;
-  overflow-x: hidden;
-  overflow-y: auto;
 }
 
 .main-container {
@@ -17,8 +14,6 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  position: relative;
-  overflow: visible;
 }
 
 
@@ -60,6 +55,8 @@ p {
   line-height: 1.2;
 
 }
+
+
 @media (max-width: 768px) {
   .background-section {
     aspect-ratio: unset;
