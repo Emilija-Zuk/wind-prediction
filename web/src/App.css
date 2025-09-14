@@ -1,3 +1,7 @@
+html {
+  scroll-behavior: auto !important;
+}
+
 .app-container {
   text-align: center;
   min-height: 100vh;
@@ -14,9 +18,19 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  animation: scrollReset 0.1s ease-out;
+}
 
-  
-
+@keyframes scrollReset {
+  0% { 
+    transform: translateY(0); 
+  }
+  1% { 
+    transform: translateY(-100vh); 
+  }
+  100% { 
+    transform: translateY(0); 
+  }
 }
 
 .background-section::before {
@@ -63,8 +77,4 @@ p {
     height: auto;
     min-height: unset;
   }
-  
-
-  
-  
 }

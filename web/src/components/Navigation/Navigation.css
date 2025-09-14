@@ -19,8 +19,25 @@
 }
 
 .nav-logo .logo-img {
-  height: 40px;
-  width: auto;
+  height: 40px !important;
+  width: auto !important;
+  min-height: 40px !important;
+  max-height: 40px !important;
+  /* Force Chrome to recalculate */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  /* Cache busting */
+  image-rendering: -webkit-optimize-contrast;
+}
+
+/* Extra specificity for Chrome mobile */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+  .nav-logo .logo-img {
+    height: 40px !important;
+    min-height: 40px !important;
+    max-height: 40px !important;
+    width: auto !important;
+  }
 }
 
 /* Desktop Navigation */

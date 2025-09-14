@@ -20,25 +20,6 @@ const ScrollToTop = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    const focusElement = document.createElement("button");
-    focusElement.style.position = "absolute";
-    focusElement.style.top = "-10px";
-    focusElement.style.left = "0";
-    focusElement.style.width = "1px";
-    focusElement.style.height = "1px";
-    focusElement.style.opacity = "0";
-    focusElement.style.pointerEvents = "none";
-    focusElement.setAttribute("aria-hidden", "true");
-
-    document.body.insertBefore(focusElement, document.body.firstChild);
-    focusElement.focus();
-
-    // Clean up immediately
-    setTimeout(() => {
-      if (document.body.contains(focusElement)) {
-        document.body.removeChild(focusElement);
-      }
-    }, 50);
   }, [pathname]);
 
   return null;

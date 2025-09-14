@@ -13,7 +13,7 @@ const Navigation: React.FC = () => {
     <nav className="navigation">
       <div className="nav-logo">
         <Link to="/">
-          <img src="/images/logo.png" alt="Em's Apps Logo" className="logo-img" />
+          <img src="/images/logo.png?v=2" alt="Em's Apps Logo" className="logo-img" />
         </Link>
       </div>
 
