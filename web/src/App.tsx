@@ -15,29 +15,19 @@ import Predictions from "./pages/Predictions/Predictions";
 import HistoricalData from "./pages/HistoricalData/HistoricalData";
 import About from "./pages/About/About";
 
-
 const ScrollToTop = () => {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    // Multiple approaches to scroll to top
     const scrollToTop = () => {
-      window.scrollTo(0, 0);
-      document.documentElement.scrollTop = 0;
-      document.body.scrollTop = 0;
-      const mainContainer = document.querySelector(".main-container");
-      if (mainContainer) {
-        mainContainer.scrollTop = 0;
-      }
+      window.scrollTo(0, 0);     
+      document.body.style.overflow = "hidden";  // lock scrolling
+      void document.body.offsetHeight;          // force reflow to flush queue
+      document.body.style.overflow = "";        // unlock scrolling
     };
 
-    requestAnimationFrame(() => {
-      scrollToTop();
-    });
-
-    setTimeout(() => {
-      scrollToTop();
-    }, 100);
+    scrollToTop();
+    
   }, [pathname]);
 
   return null;
