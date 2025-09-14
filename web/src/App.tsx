@@ -19,7 +19,30 @@ const ScrollToTop = () => {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    window.scrollTo(0, 0);
+    // Chrome mobile specific fix
+    const isChromeMobile =
+      /Chrome/.test(navigator.userAgent) && /Mobile/.test(navigator.userAgent);
+
+    if (isChromeMobile) {
+      // Method 1: Force address bar to collapse first
+      window.scrollTo(0, 1);
+
+      // Method 2: Then scroll to actual top after address bar is hidden
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+      }, 100);
+
+      // Method 3: Force viewport recalculation
+      setTimeout(() => {
+        window.dispatchEvent(new Event("resize"));
+        window.scrollTo(0, 0);
+      }, 200);
+    } else {
+      // For all other browsers
+      window.scrollTo(0, 0);
+    }
   }, [pathname]);
 
   return null;
