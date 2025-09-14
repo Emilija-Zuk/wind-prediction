@@ -1,11 +1,11 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   createBrowserRouter,
   RouterProvider,
   Route,
   createRoutesFromElements,
-  ScrollRestoration,
   Outlet,
+  useLocation,
 } from "react-router-dom";
 import "./App.css";
 
@@ -16,13 +16,40 @@ import HistoricalData from "./pages/HistoricalData/HistoricalData";
 import About from "./pages/About/About";
 
 
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    // Multiple approaches to scroll to top
+    const scrollToTop = () => {
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+      const mainContainer = document.querySelector(".main-container");
+      if (mainContainer) {
+        mainContainer.scrollTop = 0;
+      }
+    };
+
+    requestAnimationFrame(() => {
+      scrollToTop();
+    });
+
+    setTimeout(() => {
+      scrollToTop();
+    }, 100);
+  }, [pathname]);
+
+  return null;
+};
+
 const Layout = () => {
   return (
     <div className="app-container">
       <div className="main-container">
         <Navigation />
+        <ScrollToTop />
         <Outlet />
-        <ScrollRestoration getKey={(location) => location.pathname} />
       </div>
     </div>
   );
