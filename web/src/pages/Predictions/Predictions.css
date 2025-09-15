@@ -1,7 +1,7 @@
 .predictions-page {
   min-height: 100vh; 
   display: flex;
-  align-items: center;
+  /* align-items: center; */
   justify-content: center;
   text-align: center;
   padding: 2rem;
@@ -24,7 +24,7 @@
 .page-content h1 {
   color: #333;
   margin-bottom: 0.5rem;
-  font-size: 2.2rem;
+  font-size: 1.5rem;
 }
 
 .page-content p {
@@ -37,7 +37,7 @@
   font-weight: normal;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 768px) {
   .predictions-page {
     padding: 0.5rem;
     width: 100vw;
@@ -51,4 +51,7 @@
     padding: 0.5rem;
     overflow-x: hidden;
   }
+  .page-content h1 {
+  font-size: 1.2rem;
+ }
 }

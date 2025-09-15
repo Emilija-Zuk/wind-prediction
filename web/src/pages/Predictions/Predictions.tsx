@@ -7,9 +7,7 @@ const Predictions: React.FC = () => {
   return (
     <div className="predictions-page">
       <div className="page-content">
-        <h1>Current Wind</h1>
-        <p className="chart-subtitle">Date: {currentData.metadata.date}</p>
-        
+        <h1>Live Wind Report Gold Coast Seaway</h1>
         <WindChart data={currentData.data} />
       </div>
     </div>
