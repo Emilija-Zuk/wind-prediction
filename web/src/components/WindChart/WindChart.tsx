@@ -3,7 +3,7 @@ import * as d3 from "d3";
 import "./WindChart.css";
 
 interface WindChartProps {
-  data: Array<{ x: string; y: number }>;
+  data: Array<{ x: string; wind_knots: number }>;
   title?: string;
   className?: string;
 }
@@ -16,7 +16,7 @@ const WindChart: React.FC<WindChartProps> = ({ data, title, className = "" }) =>
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    const checkResize = () => setIsMobile(window.innerWidth <= 900);
+    const checkResize = () => setIsMobile(window.innerWidth <= 768);
     checkResize();
     window.addEventListener('resize', checkResize);
     return () => window.removeEventListener('resize', checkResize);
@@ -30,13 +30,13 @@ const WindChart: React.FC<WindChartProps> = ({ data, title, className = "" }) =>
 
     const containerWidth = containerRef.current.offsetWidth;
     const margin = { top: 40, right: 20, bottom: 60, left: 50 };
-    const width = containerWidth - margin.left - margin.right;
+    const width = containerWidth - margin.left - margin.right - 30;
     const height = 200;
 
     const parseTime = d3.timeParse("%H:%M");
     const chartData = data.map(d => ({
       time: parseTime(d.x)!,
-      windSpeed: d.y
+      windSpeed: d.wind_knots
     }));
 
     const recentData = chartData.slice(-72);
@@ -107,7 +107,7 @@ const WindChart: React.FC<WindChartProps> = ({ data, title, className = "" }) =>
       .style("stroke-dasharray", "3,3")
       .style("opacity", 0.3);
 
-    // Draw line and dots
+    // Draw line
     chartGroup.append("path")
       .datum(recentData)
       .attr("fill", "none")
@@ -115,13 +115,6 @@ const WindChart: React.FC<WindChartProps> = ({ data, title, className = "" }) =>
       .attr("stroke-width", 3)
       .attr("d", line);
 
-    chartGroup.selectAll(".dot")
-      .data(recentData.filter((_, i) => i % 6 === 0))
-      .enter().append("circle")
-      .attr("cx", d => xScale(d.time))
-      .attr("cy", d => yScale(d.windSpeed))
-      .attr("r", 4)
-      .attr("fill", "#2563eb");
 
     // Auto-scroll on mobile
     if (isMobile && scrollRef.current) {
