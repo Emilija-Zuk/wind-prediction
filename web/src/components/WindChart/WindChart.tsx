@@ -239,9 +239,10 @@ const WindChart: React.FC<WindChartProps> = ({ data, title, className = "" }) =>
     <div className={`chart-container ${isMobile ? 'mobile-chart' : ''} ${className}`} ref={containerRef}>
       <div style={{ display: 'flex' }}>
         <svg ref={yAxisRef} style={{ flexShrink: 0 }}></svg>
-        <div 
+        <div
           ref={scrollRef}
-          style={{ 
+          className={isMobile ? "wind-scroll" : ""}
+          style={{
             overflowX: isMobile ? 'auto' : 'hidden',
             overflowY: 'hidden',
             flexGrow: 1
@@ -254,8 +255,14 @@ const WindChart: React.FC<WindChartProps> = ({ data, title, className = "" }) =>
         <div
           className="wind-tooltip"
           style={{
-            left: tooltip.x + 20,
+            position: "fixed",
             top: tooltip.y - 100,
+            ...(isMobile
+              ? (tooltip.x < window.innerWidth / 2
+                  ? { left: tooltip.x + 20, right: "auto" }
+                  : { left: "auto", right: window.innerWidth - tooltip.x + 20 })
+              : { left: tooltip.x + 20, right: "auto" }
+            ),
           }}
         >
           <div>Time: <b>{tooltip.data.time}</b></div>
