@@ -3,7 +3,7 @@ import * as d3 from "d3";
 import "./WindChart.css";
 
 interface WindChartProps {
-  data: Array<{ x: string; wind_knots: number }>;
+  data: Array<{ x: string; wind_knots: number; direction_degrees: number; direction_text: string; wind_gust_knots: number}>;
   title?: string;
   className?: string;
 }
@@ -14,8 +14,20 @@ const WindChart: React.FC<WindChartProps> = ({ data, title, className = "" }) =>
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [tooltip, setTooltip] = useState<{
+    visible: boolean;
+    x: number;
+    y: number;
+    data?: {
+      wind_knots: number;
+      wind_gust_knots: number;
+      direction_text: string;
+      time: string;
+    };
+  }>({ visible: false, x: 0, y: 0 });
 
   useEffect(() => {
+    // update mobile state on resize
     const checkResize = () => setIsMobile(window.innerWidth <= 768);
     checkResize();
     window.addEventListener('resize', checkResize);
@@ -25,6 +37,7 @@ const WindChart: React.FC<WindChartProps> = ({ data, title, className = "" }) =>
   useEffect(() => {
     if (!yAxisRef.current || !chartRef.current || !containerRef.current) return;
 
+    // clear previous svg content
     d3.select(yAxisRef.current).selectAll("*").remove();
     d3.select(chartRef.current).selectAll("*").remove();
 
@@ -34,11 +47,16 @@ const WindChart: React.FC<WindChartProps> = ({ data, title, className = "" }) =>
     const height = 200;
 
     const parseTime = d3.timeParse("%H:%M");
+    
+    // convert data to chart-friendly format
     const chartData = data.map(d => ({
       time: parseTime(d.x)!,
-      windSpeed: d.wind_knots
+      windSpeed: d.wind_knots,
+      windGust: d.wind_gust_knots,
+      direction: d.direction_degrees
     }));
 
+    // only show the last 72 points
     const recentData = chartData.slice(-72);
     const chartWidth = isMobile ? width * 2.5 : width;
 
@@ -50,7 +68,7 @@ const WindChart: React.FC<WindChartProps> = ({ data, title, className = "" }) =>
       .domain([0, 30])
       .range([height, 0]);
 
-    // Y-axis setup
+    // y axis and label
     const yAxis = d3.select(yAxisRef.current)
       .attr("width", margin.left)
       .attr("height", height + margin.top + margin.bottom);
@@ -69,7 +87,7 @@ const WindChart: React.FC<WindChartProps> = ({ data, title, className = "" }) =>
       .style("font-size", "14px")
       .text("Wind Speed (knots)");
 
-    // Main chart setup
+    // main chart group
     const chart = d3.select(chartRef.current)
       .attr("width", chartWidth)
       .attr("height", height + margin.top + margin.bottom);
@@ -77,19 +95,14 @@ const WindChart: React.FC<WindChartProps> = ({ data, title, className = "" }) =>
     const chartGroup = chart.append("g")
       .attr("transform", `translate(0,${margin.top})`);
 
-    const line = d3.line<{ time: Date; windSpeed: number }>()
-      .x(d => xScale(d.time))
-      .y(d => yScale(d.windSpeed))
-      .curve(d3.curveMonotoneX);
-
-    // X-axis
+    // x axis
     chartGroup.append("g")
       .attr("transform", `translate(0,${height})`)
       .call(d3.axisBottom(xScale)
         .tickFormat(d => d3.timeFormat("%H:%M")(d as Date))
         .ticks(d3.timeHour.every(1)));
 
-    // Grid lines
+    // grid lines for better readability
     chartGroup.append("g")
       .call(d3.axisBottom(xScale)
         .tickSize(-height)
@@ -97,26 +110,122 @@ const WindChart: React.FC<WindChartProps> = ({ data, title, className = "" }) =>
         .ticks(d3.timeHour.every(1)))
       .attr("transform", `translate(0,${height})`)
       .style("stroke-dasharray", "3,3")
-      .style("opacity", 0.3);
+      .style("opacity", 0.1);
 
     chartGroup.append("g")
       .call(d3.axisLeft(yScale)
         .tickSize(-chartWidth)
         .tickFormat(() => "")
         .tickValues([0, 5, 10, 15, 20, 25, 30]))
-      .style("stroke-dasharray", "3,3")
-      .style("opacity", 0.3);
+      .style("stroke-dasharray", "4,2")
+      .style("opacity", 0.1);
 
-    // Draw line
-    chartGroup.append("path")
-      .datum(recentData)
-      .attr("fill", "none")
-      .attr("stroke", "#2563eb")
-      .attr("stroke-width", 3)
-      .attr("d", line);
+    // arrow shape config
+    const shaftWidth = 7;
+    const shaftLength = 12;
+    const headWidth = 12;    
+    const headLength = 10;
+    const minY = 18;
 
+    // svg path for arrow
+    const arrowPath = `
+      M ${-shaftWidth/2} 0
+      L ${-shaftWidth/2} ${-shaftLength}
+      L ${-headWidth/2} ${-shaftLength}
+      L 0 ${-shaftLength - headLength}
+      L ${headWidth/2} ${-shaftLength}
+      L ${shaftWidth/2} ${-shaftLength}
+      L ${shaftWidth/2} 0
+      Z
+    `;
 
-    // Auto-scroll on mobile
+    // draw gust arrows in background
+    chartGroup.selectAll(".wind-gust-arrow")
+      .data(recentData)
+      .enter()
+      .append("path")
+      .attr("class", "wind-gust-arrow")
+      .attr("d", arrowPath)
+      .attr("stroke", "#dddddd")
+      .attr("stroke-width", 0.7)
+      .attr("fill", "#eeeeee")
+      .attr("opacity", 0.7)
+      .attr("transform", d => {
+        const x = xScale(d.time);
+        const y = Math.min(yScale(d.windGust), height - minY);
+        return `translate(${x},${y}) rotate(${d.direction + 180})`;
+      });
+
+    // draw main wind arrows
+    chartGroup.selectAll(".wind-arrow")
+      .data(recentData)
+      .enter()
+      .append("path")
+      .attr("class", "wind-arrow")
+      .attr("d", arrowPath)
+      .attr("stroke", "black")
+      .attr("stroke-width", 0.2)
+      .attr("fill", d => {
+        if (d.windSpeed <= 10) return "red";
+        if (d.windSpeed <= 17) return "yellow";
+        return "green";
+      })
+      .attr("transform", d => {
+        const x = xScale(d.time);
+        const y = Math.min(yScale(d.windSpeed), height - minY);
+        return `translate(${x},${y}) rotate(${d.direction + 180})`;
+      });
+
+    // helper to find nearest data point for tooltip
+    function getNearestData(mx: number) {
+      const bisect = d3.bisector((d: any) => d.time).left;
+      const x0 = xScale.invert(mx);
+      const idx = bisect(recentData, x0, 1);
+      const d0 = recentData[idx - 1];
+      const d1 = recentData[idx];
+      if (!d0) return d1;
+      if (!d1) return d0;
+      // compare which point is closer to mouse x
+      return (x0.getTime() - d0.time.getTime()) > (d1.time.getTime() - x0.getTime()) ? d1 : d0;
+    }
+
+    const svg = d3.select(chartRef.current);
+
+    function showTooltip(event: any) {
+      const [mx] = d3.pointer(event);
+      const nearest = getNearestData(mx);
+      if (!nearest) return;
+      // get direction text from original data
+      const orig = data.find(d => d.x === d3.timeFormat("%H:%M")(nearest.time));
+      setTooltip({
+        visible: true,
+        x: event.clientX,
+        y: event.clientY,
+        data: {
+          wind_knots: Math.round(nearest.windSpeed),
+          wind_gust_knots: Math.round(nearest.windGust),
+          direction_text: orig?.direction_text || "",
+          time: d3.timeFormat("%H:%M")(nearest.time),
+        }
+      });
+    }
+
+    function hideTooltip() {
+      setTooltip(t => ({ ...t, visible: false }));
+    }
+
+    // attach tooltip events to svg
+    svg.on("mousemove", showTooltip)
+       .on("mouseleave", hideTooltip)
+       .on("touchstart", function(event) {
+         showTooltip(event);
+       })
+       .on("touchmove", function(event) {
+         showTooltip(event);
+       })
+       .on("touchend", hideTooltip);
+
+    // scroll to end on mobile for latest data
     if (isMobile && scrollRef.current) {
       setTimeout(() => {
         if (scrollRef.current) {
@@ -124,7 +233,6 @@ const WindChart: React.FC<WindChartProps> = ({ data, title, className = "" }) =>
         }
       }, 100);
     }
-
   }, [data, isMobile]);
 
   return (
@@ -142,6 +250,20 @@ const WindChart: React.FC<WindChartProps> = ({ data, title, className = "" }) =>
           <svg ref={chartRef}></svg>
         </div>
       </div>
+      {tooltip.visible && tooltip.data && (
+        <div
+          className="wind-tooltip"
+          style={{
+            left: tooltip.x + 20,
+            top: tooltip.y - 100,
+          }}
+        >
+          <div>Time: <b>{tooltip.data.time}</b></div>
+          <div>Average: <b>{tooltip.data.wind_knots} kn</b></div>
+          <div>Gust: <b>{tooltip.data.wind_gust_knots} kn</b></div>
+          <div>Direction: <b>{tooltip.data.direction_text}</b></div>
+        </div>
+      )}
     </div>
   );
 };
