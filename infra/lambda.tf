@@ -1,3 +1,10 @@
+variable "ww_api_key" {
+  type        = string
+  description = "WillyWeather API key"
+  sensitive   = true
+}
+
+
 data "archive_file" "lambda1" {
   type        = "zip"
   source_dir  = "${path.module}/../backend/current_wind/"
@@ -25,6 +32,11 @@ resource "aws_iam_role" "iam_for_lambda" {
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
 }
 
+resource "aws_iam_role_policy_attachment" "lambda_logging" {
+  role       = aws_iam_role.iam_for_lambda.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
 
 resource "aws_lambda_function" "lambda1" {
 
@@ -44,7 +56,8 @@ resource "aws_lambda_function" "lambda1" {
 
   environment {
     variables = {
-      foo = "bar"
+      foo = "bar",
+      WW_API_KEY = var.ww_api_key
     }
   }
 } 

@@ -1,19 +1,59 @@
 import json
 import os
+import datetime
+import requests   # must be packaged
 
 def lambda_handler(event, context):
-    # get file path inside the Lambda package
-    file_path = os.path.join(os.path.dirname(__file__), "data.json")
+    """Return last 12 hours of wind data from WillyWeather."""
+    api_key = os.environ["WW_API_KEY"]
+    station_id = "18591"  # Gold Coast Seaway
+    obs = "wind,wind-gust"
 
-    with open(file_path) as f:
-        payload = json.load(f)
+    url = f"https://api.willyweather.com.au/v2/{api_key}/locations/{station_id}/weather.json"
+    params = {"observationalGraphs": obs}
+
+    # Fetch live data
+    r = requests.get(url, params=params, timeout=10)
+    r.raise_for_status()
+    raw = r.json()
+
+    # Extract and filter the last 12 hours
+    wind_points = raw["observationalGraphs"]["wind"]["dataConfig"]["series"]["groups"][0]["points"]
+    gust_points = raw["observationalGraphs"]["wind-gust"]["dataConfig"]["series"]["groups"][0]["points"]
+
+    now_utc = datetime.datetime.now(datetime.timezone.utc)
+    cutoff = now_utc - datetime.timedelta(hours=12)
+
+    graph_data = []
+    for i, p in enumerate(wind_points):
+        dt = datetime.datetime.fromtimestamp(p["x"], tz=datetime.timezone.utc)
+        if dt < cutoff:
+            continue
+        gust_val = gust_points[i]["y"] * 0.539957 if i < len(gust_points) else None
+
+        graph_data.append({
+            "x": dt.strftime("%H:%M"),
+            "wind_knots": p["y"] * 0.539957,
+            "direction_degrees": p.get("direction"),
+            "direction_text": p.get("directionText"),
+            "wind_gust_knots": gust_val
+        })
+
+    final_output = {
+        "metadata": {
+            "title": f"{raw.get('location', {}).get('name', 'Gold Coast Seaway')} Wind Data",
+            "unit": "knots",
+            "date": now_utc.strftime("%Y-%m-%d")
+        },
+        "data": graph_data
+    }
 
     return {
-        'statusCode': 200,
-        'headers': {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'GET,OPTIONS',
-            'Content-Type': 'application/json'
+        "statusCode": 200,
+        "headers": {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET,OPTIONS",
+            "Content-Type": "application/json",
         },
-        'body': json.dumps(payload)
+        "body": json.dumps(final_output)
     }
