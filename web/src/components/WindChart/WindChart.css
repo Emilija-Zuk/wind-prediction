@@ -41,10 +41,7 @@
 
 }
 
-.wind-scroll {
-  overscroll-behavior-x: contain;
-  -webkit-overflow-scrolling: touch; /* smooth scrolling */
-}
+
 
 @media (max-width: 1280px) {
   .chart-container {

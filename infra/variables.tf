@@ -36,3 +36,14 @@ locals {
   cert_arn = aws_acm_certificate.cert.arn 
   zone_id = aws_route53_zone.main.zone_id 
 }
+
+variable "REGION" {
+  default = "ap-southeast-2"
+}
+
+variable "ZONE1" {
+  default = "ap-southeast-2a"
+}
+
+#  AWS account details
+data "aws_caller_identity" "current" {}

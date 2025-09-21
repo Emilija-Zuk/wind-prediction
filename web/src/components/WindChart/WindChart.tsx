@@ -241,7 +241,7 @@ const WindChart: React.FC<WindChartProps> = ({ data, title, className = "" }) =>
         <svg ref={yAxisRef} style={{ flexShrink: 0 }}></svg>
         <div
           ref={scrollRef}
-          className={isMobile ? "wind-scroll" : ""}
+       
           style={{
             overflowX: isMobile ? 'auto' : 'hidden',
             overflowY: 'hidden',
