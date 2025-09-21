@@ -3,7 +3,7 @@ import * as d3 from "d3";
 import "./WindChart.css";
 
 interface WindChartProps {
-  data: Array<{ x: string; wind_knots: number; direction_degrees: number; direction_text: string; wind_gust_knots: number}>;
+  data: Array<{ x: string; wind_knots: number; direction_degrees: number; direction_text: string; wind_gust_knots?: number}>;
   title?: string;
   className?: string;
 }
@@ -20,7 +20,7 @@ const WindChart: React.FC<WindChartProps> = ({ data, title, className = "" }) =>
     y: number;
     data?: {
       wind_knots: number;
-      wind_gust_knots: number;
+      wind_gust_knots?: number;
       direction_text: string;
       time: string;
     };
@@ -47,14 +47,34 @@ const WindChart: React.FC<WindChartProps> = ({ data, title, className = "" }) =>
     const height = 200;
 
     const parseTime = d3.timeParse("%H:%M");
+
+    const parseHM = d3.timeParse("%H:%M");
+      const today0 = new Date();
+      today0.setHours(0, 0, 0, 0);
+
+      let prevHM: Date | null = null;
+      let dayOffset = 0;
     
     // convert data to chart-friendly format
-    const chartData = data.map(d => ({
-      time: parseTime(d.x)!,
-      windSpeed: d.wind_knots,
-      windGust: d.wind_gust_knots,
-      direction: d.direction_degrees
-    }));
+const chartData = data.map(d => {
+  const hm = parseHM(d.x)!;
+  if (prevHM && hm < prevHM) dayOffset++; // crossed midnight -> next day
+  prevHM = hm;
+
+  const time = new Date(
+    today0.getTime() +
+    dayOffset * 24 * 60 * 60 * 1000 +
+    hm.getHours() * 3600000 +
+    hm.getMinutes() * 60000
+  );
+
+  return {
+    time,
+    windSpeed: d.wind_knots,
+    windGust: d.wind_gust_knots ?? 0,
+    direction: d.direction_degrees
+  };
+});
 
     // only show the last 72 points
     const recentData = chartData.slice(-72);
@@ -141,7 +161,7 @@ const WindChart: React.FC<WindChartProps> = ({ data, title, className = "" }) =>
 
     // draw gust arrows in background
     chartGroup.selectAll(".wind-gust-arrow")
-      .data(recentData)
+      .data(recentData.filter(d => d.windGust > 0))
       .enter()
       .append("path")
       .attr("class", "wind-gust-arrow")
@@ -202,8 +222,9 @@ const WindChart: React.FC<WindChartProps> = ({ data, title, className = "" }) =>
         x: event.clientX,
         y: event.clientY,
         data: {
-          wind_knots: Math.round(nearest.windSpeed),
-          wind_gust_knots: Math.round(nearest.windGust),
+          wind_knots: Math.round(nearest.windSpeed * 10) / 10,
+        
+          wind_gust_knots: Math.round((nearest.windGust || 0) * 10) / 10,
           direction_text: orig?.direction_text || "",
           time: d3.timeFormat("%H:%M")(nearest.time),
         }

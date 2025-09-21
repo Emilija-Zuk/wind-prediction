@@ -1,25 +1,44 @@
 import React, { useState } from "react";
 import "./Predictions.css";
 import WindChart from "../../components/WindChart/WindChart";
-import localData from "../../assets/data/data.json";   // default data
+import localData from "../../assets/data/data.json";   // current-wind default
+
 
 const Predictions: React.FC = () => {
-  const [chartData, setChartData] = useState<any>(localData); // start with local data
+  // current data
+  const [chartData, setChartData] = useState<any>(localData);
   const [loading, setLoading] = useState(false);
 
-  const apiUrl = "https://fydlfscjee.execute-api.ap-southeast-2.amazonaws.com/test1/submit";
+  // forecast data
+  const [forecastData, setForecastData] = useState<any>(localData);
+  const [forecastLoading, setForecastLoading] = useState(false);
 
-  const refreshData = () => {
+  const currentUrl  = "https://fydlfscjee.execute-api.ap-southeast-2.amazonaws.com/test1/submit";
+  const forecastUrl = "https://fydlfscjee.execute-api.ap-southeast-2.amazonaws.com/test1/forecast";
+
+  const refreshCurrent = () => {
     setLoading(true);
-    fetch(apiUrl, {
-      headers: {
-        "x-api-key": process.env.REACT_APP_API_KEY1 as string
-      }
+    fetch(currentUrl, {
+      headers: { "x-api-key": process.env.REACT_APP_API_KEY1 as string }
     })
       .then(res => res.json())
       .then(data => setChartData(data))
-      .catch(err => console.error(err))
+      .catch(console.error)
       .finally(() => setLoading(false));
+  };
+
+  const refreshForecast = () => {
+    setForecastLoading(true);
+    fetch(forecastUrl, {
+      headers: { "x-api-key": process.env.REACT_APP_API_KEY1 as string }
+    })
+      .then(res => res.json())
+          .then(data => {
+      console.log('forecast data', data);
+      setForecastData(data);
+    })
+      .catch(console.error)
+      .finally(() => setForecastLoading(false));
   };
 
   return (
@@ -28,9 +47,23 @@ const Predictions: React.FC = () => {
         <h1>Live Wind Report Gold Coast Seaway</h1>
 
         <WindChart data={chartData.data} />
+        <button
+          className="refresh-button"
+          onClick={refreshCurrent}
+          disabled={loading}
+        >
+          {loading ? "Refreshing…" : "Refresh Current Wind"}
+        </button>
 
-        <button className="refresh-button" onClick={refreshData} disabled={loading} >
-          {loading ? "Refreshing…" : "Refresh Data"}
+        <h1>Forecast Wind</h1>
+
+        <WindChart data={forecastData.data} />
+        <button
+          className="refresh-button"
+          onClick={refreshForecast}
+          disabled={forecastLoading}
+        >
+          {forecastLoading ? "Refreshing…" : "Refresh Forecast"}
         </button>
       </div>
     </div>
