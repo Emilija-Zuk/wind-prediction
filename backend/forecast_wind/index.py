@@ -1,16 +1,20 @@
-import json, os, datetime, requests
+import json
+import os
+import datetime
+import boto3
 from zoneinfo import ZoneInfo
 
+s3 = boto3.client("s3")
+bucket_name = "forecast-wind"
+
 def lambda_handler(event, context):
-    api_key = os.environ["WW_API_KEY"]
-    station_id = "18591"
+    # find today's file (e.g. GC2025-09-23.json)
+    today = datetime.datetime.now().strftime("%Y-%m-%d")
+    key = f"GC{today}.json"
 
-    url = f"https://api.willyweather.com.au/v2/{api_key}/locations/{station_id}/weather.json"
-    params = {"forecasts": "wind"}
-
-    r = requests.get(url, params=params, timeout=10)
-    r.raise_for_status()
-    raw = r.json()
+    # get the object from S3
+    obj = s3.get_object(Bucket=bucket_name, Key=key)
+    raw = json.loads(obj["Body"].read())
 
     bris = ZoneInfo("Australia/Brisbane")
     now = datetime.datetime.now(bris)
@@ -35,7 +39,6 @@ def lambda_handler(event, context):
     # interpolate to 10-minute steps
     filled = []
     for a, b in zip(points, points[1:]):
-        # add point a
         filled.append({
             "x": a["ts"].strftime("%H:%M"),
             "wind_knots": a["wind_knots"],
@@ -43,7 +46,6 @@ def lambda_handler(event, context):
             "direction_text": a["direction_text"]
         })
 
-        # fill the next 50 minutes in 10-minute steps
         t = a["ts"]
         while (t + datetime.timedelta(minutes=10)) < b["ts"]:
             t += datetime.timedelta(minutes=10)
@@ -51,11 +53,10 @@ def lambda_handler(event, context):
             filled.append({
                 "x": t.strftime("%H:%M"),
                 "wind_knots": a["wind_knots"] + frac * (b["wind_knots"] - a["wind_knots"]),
-                "direction_degrees": a["direction_degrees"],   # simple: hold direction
+                "direction_degrees": a["direction_degrees"],
                 "direction_text": a["direction_text"]
             })
 
-    # add final hourly point
     if points:
         last = points[-1]
         filled.append({

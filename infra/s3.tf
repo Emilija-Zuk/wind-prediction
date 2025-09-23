@@ -26,3 +26,29 @@ resource "aws_s3_bucket_policy" "bucket_policy" {
     }]
   })
 }
+
+# record-wind bucket
+resource "aws_s3_bucket" "record_wind" {
+  bucket = "record-wind"
+}
+
+resource "aws_s3_bucket_public_access_block" "record_wind_block" {
+  bucket                  = aws_s3_bucket.record_wind.id
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+# forecast-wind bucket
+resource "aws_s3_bucket" "forecast_wind" {
+  bucket = "forecast-wind"
+}
+
+resource "aws_s3_bucket_public_access_block" "forecast_wind_block" {
+  bucket                  = aws_s3_bucket.forecast_wind.id
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}

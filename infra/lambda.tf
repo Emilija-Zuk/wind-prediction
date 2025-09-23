@@ -91,6 +91,23 @@ resource "aws_lambda_permission" "allow_api_gateway_forecast" {
 
 
 
+data "aws_iam_policy_document" "forecast_lambda_s3_read" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "s3:GetObject"
+    ]
+    resources = [
+      "${aws_s3_bucket.forecast_wind.arn}/*"
+    ]
+  }
+}
+
+resource "aws_iam_role_policy" "forecast_lambda_s3_read" {
+  name   = "forecast-lambda-s3-read"
+  role   = aws_iam_role.iam_for_lambda.id
+  policy = data.aws_iam_policy_document.forecast_lambda_s3_read.json
+}
 
 
 
