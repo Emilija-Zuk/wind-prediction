@@ -111,7 +111,24 @@ resource "aws_iam_role_policy" "forecast_lambda_s3_read" {
 
 
 
+# allow lambda1 to write JSON to current-wind bucket
+data "aws_iam_policy_document" "current_wind_s3_write" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "s3:PutObject"
+    ]
+    resources = [
+      "${aws_s3_bucket.current_wind.arn}/*"
+    ]
+  }
+}
 
+resource "aws_iam_role_policy" "current_wind_s3_write" {
+  name   = "current-wind-s3-write"
+  role   = aws_iam_role.iam_for_lambda.id
+  policy = data.aws_iam_policy_document.current_wind_s3_write.json
+}
 
 
 

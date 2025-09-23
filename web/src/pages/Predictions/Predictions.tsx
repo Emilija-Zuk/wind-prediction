@@ -9,7 +9,7 @@ const Predictions: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
   // forecast data
-  const [forecastData, setForecastData] = useState<any>(localData);
+  const [forecastData, setForecastData] = useState<any | null>(null);
 
   const currentUrl  = "https://fydlfscjee.execute-api.ap-southeast-2.amazonaws.com/test1/submit";
   const forecastUrl = "https://fydlfscjee.execute-api.ap-southeast-2.amazonaws.com/test1/forecast";
@@ -55,8 +55,10 @@ const Predictions: React.FC = () => {
 
 
         <h1>Forecast Wind</h1>
-        <WindChart data={forecastData.data} />
-        {/* second refresh button removed */}
+        {forecastData
+        ? <WindChart data={forecastData.data} />
+        : <p>Loading forecast…</p>}
+              
       </div>
     </div>
   );

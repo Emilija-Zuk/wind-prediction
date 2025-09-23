@@ -2,6 +2,10 @@ import json
 import os
 import datetime
 import requests   # must be packaged
+import boto3
+from zoneinfo import ZoneInfo
+
+s3 = boto3.resource("s3") 
 
 def lambda_handler(event, context):
     """Return last 12 hours of wind data from WillyWeather."""
@@ -16,6 +20,15 @@ def lambda_handler(event, context):
     r = requests.get(url, params=params, timeout=10)
     r.raise_for_status()
     raw = r.json()
+
+    # save raw data to S3
+    bris = ZoneInfo("Australia/Brisbane")
+    now_bris = datetime.datetime.now(bris)
+    file_name = f"GC{now_bris.strftime('%Y-%m-%d_%H-%M')}.json"
+    tmp_path = f"/tmp/{file_name}"
+    with open(tmp_path, "w") as f:
+        json.dump(raw, f)
+    s3.meta.client.upload_file(tmp_path, "current-wind", file_name)
 
     # Extract and filter the last 12 hours
     wind_points = raw["observationalGraphs"]["wind"]["dataConfig"]["series"]["groups"][0]["points"]
