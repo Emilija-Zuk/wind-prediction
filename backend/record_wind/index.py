@@ -1,11 +1,16 @@
 import json, boto3, os, requests, datetime
+from zoneinfo import ZoneInfo
 
 s3 = boto3.resource("s3")
 BASE_URL = "https://api.willyweather.com.au/v2/"
 
 def lambda_handler(event, context):
     api_key = os.environ["WW_API_KEY"]
-    yesterday = datetime.datetime.now() - datetime.timedelta(days=1)
+
+    bris = ZoneInfo("Australia/Brisbane")
+    now_bris = datetime.datetime.now(bris)
+    today = now_bris.strftime("%Y-%m-%d")
+    yesterday = now_bris - datetime.timedelta(days=1)
     date_str = yesterday.strftime("%Y-%m-%d")
 
     # daily observations
@@ -23,10 +28,10 @@ def lambda_handler(event, context):
         )
 
     # forecast for GC
-    today = datetime.datetime.now().strftime("%Y-%m-%d")
+  
     fetch_and_store(
         f"{BASE_URL}{api_key}/locations/18591/weather.json",
-        {"forecasts": "wind"},
+        {"forecasts": "wind", "days": 2},
         "forecast-wind",
         f"GC{today}.json"
     )
