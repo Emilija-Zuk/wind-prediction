@@ -36,7 +36,7 @@ const WindChart: React.FC<WindChartProps> = ({ data, title, className = "" }) =>
 
   useEffect(() => {
     if (!yAxisRef.current || !chartRef.current || !containerRef.current) return;
-
+console.log("raw data",data[0])
     // clear previous svg content
     d3.select(yAxisRef.current).selectAll("*").remove();
     d3.select(chartRef.current).selectAll("*").remove();
@@ -222,9 +222,9 @@ const chartData = data.map(d => {
         x: event.clientX,
         y: event.clientY,
         data: {
-          wind_knots: Math.round(nearest.windSpeed * 10) / 10,
-        
-          wind_gust_knots: Math.round((nearest.windGust || 0) * 10) / 10,
+     
+          wind_knots: Math.round(nearest.windSpeed),      
+          wind_gust_knots: orig?.wind_gust_knots != null ? Math.round(orig.wind_gust_knots) : undefined,
           direction_text: orig?.direction_text || "",
           time: d3.timeFormat("%H:%M")(nearest.time),
         }
@@ -288,7 +288,9 @@ const chartData = data.map(d => {
         >
           <div>Time: <b>{tooltip.data.time}</b></div>
           <div>Average: <b>{tooltip.data.wind_knots} kn</b></div>
-          <div>Gust: <b>{tooltip.data.wind_gust_knots} kn</b></div>
+          {tooltip.data.wind_gust_knots !== undefined && (
+            <div>Gust: <b>{tooltip.data.wind_gust_knots} kn</b></div>
+          )}
           <div>Direction: <b>{tooltip.data.direction_text}</b></div>
         </div>
       )}
