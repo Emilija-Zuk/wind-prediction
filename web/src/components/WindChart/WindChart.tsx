@@ -36,7 +36,7 @@ const WindChart: React.FC<WindChartProps> = ({ data, title, className = "" }) =>
 
   useEffect(() => {
     if (!yAxisRef.current || !chartRef.current || !containerRef.current) return;
-console.log("raw data",data[0])
+
     // clear previous svg content
     d3.select(yAxisRef.current).selectAll("*").remove();
     d3.select(chartRef.current).selectAll("*").remove();
@@ -249,7 +249,8 @@ const chartData = data.map(d => {
     // scroll to end on mobile for latest data
     if (isMobile && scrollRef.current) {
       setTimeout(() => {
-        if (scrollRef.current) {
+      
+        if (scrollRef.current && recentData.some(d => d.windGust > 0)) {
           scrollRef.current.scrollLeft = chartWidth - width;
         }
       }, 100);
