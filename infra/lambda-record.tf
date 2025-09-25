@@ -14,6 +14,9 @@ resource "aws_lambda_function" "record_wind" {
   runtime          = "python3.12"
   source_code_hash = data.archive_file.record_wind.output_base64sha256
 
+  timeout      = 30     # seconds 
+  memory_size  = 256    
+
   environment {
     variables = {
       WW_API_KEY = var.ww_api_key
