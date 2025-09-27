@@ -42,8 +42,8 @@ const Navigation: React.FC = () => {
         <Link to="/predictions" className="nav-link">
           Predictions
         </Link>
-        <Link to="/historical-data" className="nav-link">
-          Historical Data
+        <Link to="/analysis-data" className="nav-link">
+          Analysis
         </Link>
         <Link to="/about" className="nav-link">
           About
@@ -70,11 +70,11 @@ const Navigation: React.FC = () => {
             Predictions
           </Link>
           <Link
-            to="/historical-data"
+            to="/analysis-data"
             className="mobile-nav-link"
             onClick={() => setIsMobileMenuOpen(false)}
           >
-            Historical Data
+            Analysis
           </Link>
           <Link
             to="/about"

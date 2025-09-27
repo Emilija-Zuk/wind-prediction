@@ -1,15 +1,15 @@
 import React from "react";
-import "./HistoricalData.css";
+import "./Analysis.css";
 
-const HistoricalData: React.FC = () => {
+const Analysis: React.FC = () => {
   return (
-    <div className="historical-page">
+    <div className="analysis-page">
       <div className="page-content">
-        <h1>Historical Wind Data</h1>
+        <h1>Analysis Wind Data</h1>
         <p>Access historical wind patterns and trends for better forecasting...</p>
       </div>
     </div>
   );
 };
 
-export default HistoricalData;
+export default Analysis;
