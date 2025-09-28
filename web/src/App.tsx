@@ -12,7 +12,7 @@ import "./App.css";
 import Navigation from "./components/Navigation/Navigation";
 import Home from "./pages/Home/Home";
 import Predictions from "./pages/Predictions/Predictions";
-import HistoricalData from "./pages/HistoricalData/HistoricalData";
+import Analysis from "./pages/Analysis/Analysis";
 import About from "./pages/About/About";
 
 const ScrollToTop = () => {
@@ -45,7 +45,7 @@ const router = createBrowserRouter(
     <Route path="/" element={<Layout />}>
       <Route index element={<Home />} />
       <Route path="predictions" element={<Predictions />} />
-      <Route path="historical-data" element={<HistoricalData />} />
+      <Route path="analysis-data" element={<Analysis />} />
       <Route path="about" element={<About />} />
     </Route>
   )

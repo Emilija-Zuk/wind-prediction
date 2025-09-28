@@ -37,6 +37,12 @@ const WindChart: React.FC<WindChartProps> = ({ data, title, className = "" }) =>
   useEffect(() => {
     if (!yAxisRef.current || !chartRef.current || !containerRef.current) return;
 
+      if (data.some(d => d.wind_gust_knots !== undefined)) {
+        console.log('Current wind data:', data);
+      } else {
+        console.log('Forecast wind data:', data);
+      }
+
     // clear previous svg content
     d3.select(yAxisRef.current).selectAll("*").remove();
     d3.select(chartRef.current).selectAll("*").remove();
@@ -77,8 +83,10 @@ const chartData = data.map(d => {
 });
 
     // only show the last 72 points
+
+    
     const recentData = chartData.slice(-72);
-    const chartWidth = isMobile ? width * 2.5 : width;
+    const chartWidth = isMobile ? width * 2.6 : width;
 
     const xScale = d3.scaleTime()
       .domain(d3.extent(recentData, d => d.time) as [Date, Date])

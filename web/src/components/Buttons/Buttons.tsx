@@ -9,8 +9,8 @@ const Buttons: React.FC = () => {
     navigate("/predictions");
   };
 
-  const handleHistoricalClick = () => {
-    navigate("/historical-data");
+  const handleAnalysisClick = () => {
+    navigate("/analysis-data");
   };
 
   return (
@@ -18,8 +18,8 @@ const Buttons: React.FC = () => {
       <button className="btn btn-primary" onClick={handlePredictionsClick}>
         Explore Predictions
       </button>
-      <button className="btn btn-secondary" onClick={handleHistoricalClick}>
-        View Historical Data
+      <button className="btn btn-secondary" onClick={handleAnalysisClick}>
+        View Prediction Analysis
       </button>
     </div>
   );
