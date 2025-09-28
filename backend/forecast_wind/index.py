@@ -18,7 +18,10 @@ def lambda_handler(event, context):
 
     bris = ZoneInfo("Australia/Brisbane")
     now = datetime.datetime.now(bris)
-    cutoff = now + datetime.timedelta(hours=12)
+    start_hour = (now.replace(minute=0, second=0, microsecond=0)
+              + datetime.timedelta(hours=1 if now.minute > 0 or now.second > 0 else 0))
+
+    cutoff = start_hour + datetime.timedelta(hours=12)
 
     # collect hourly points
     points = []
@@ -26,7 +29,7 @@ def lambda_handler(event, context):
         for e in day["entries"]:
             ts = datetime.datetime.fromisoformat(e["dateTime"])
             ts = ts.astimezone(bris) if ts.tzinfo else ts.replace(tzinfo=bris)
-            if now <= ts <= cutoff:
+            if start_hour <= ts <= cutoff:
                 points.append({
                     "ts": ts,
                     "wind_knots": e["speed"] * 0.539957,

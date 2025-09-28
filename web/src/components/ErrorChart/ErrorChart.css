@@ -1,0 +1,64 @@
+.chart-container {
+  background: white;
+  border-radius: 8px;
+  padding: 1rem 1.5rem 1rem 1rem;
+  width: 100%;
+  max-width: 800px;
+  min-width: 300px;
+  /* box-sizing: border-box; */
+  overflow: hidden;
+}
+
+.chart-container svg {
+  font-family: Arial, sans-serif;
+  display: block;
+}
+
+.grid line {
+  stroke: #ddd;
+}
+
+.grid path {
+  stroke-width: 0;
+}
+
+.wind-tooltip {
+  font-size: 15px;
+  color: #222;
+  background: #fff;
+
+  position: fixed;
+  left: 0; /* Will be set inline from TSX */
+  top: 0;  /* Will be set inline from TSX */
+
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 10px 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  pointer-events: none;
+  z-index: 10;
+  min-width: 120px;
+
+}
+
+
+
+@media (max-width: 1280px) {
+  .chart-container {
+    width: 95vw;
+    max-width: 95vw;
+  }
+}
+
+@media (max-width: 768px) {
+  .chart-container {
+    width: calc(100vw - 1rem);
+    max-width: calc(100vw - 1rem);
+    min-width: calc(100vw - 1rem);
+    padding: 0.5rem 1rem 0.5rem 0.5rem;
+    margin: 1rem 0;
+    border-radius: 8px;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+}
