@@ -20,7 +20,12 @@ const Predictions: React.FC = () => {
       headers: { "x-api-key": process.env.REACT_APP_API_KEY1 as string }
     })
       .then(res => res.json())
-      .then(data => setChartData(data))
+    
+      .then(data => {
+        console.log("current wind data", data);
+        setChartData(data);
+      })
+      
       .catch(console.error)
       .finally(() => setLoading(false));
   };
@@ -32,7 +37,7 @@ const Predictions: React.FC = () => {
     })
       .then(res => res.json())
       .then(data => {
-        console.log("forecast data", data);
+        // console.log("forecast data", data);
         setForecastData(data);
       })
       .catch(console.error);

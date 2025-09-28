@@ -37,12 +37,6 @@ const WindChart: React.FC<WindChartProps> = ({ data, title, className = "" }) =>
   useEffect(() => {
     if (!yAxisRef.current || !chartRef.current || !containerRef.current) return;
 
-      if (data.some(d => d.wind_gust_knots !== undefined)) {
-        console.log('Current wind data:', data);
-      } else {
-        console.log('Forecast wind data:', data);
-      }
-
     // clear previous svg content
     d3.select(yAxisRef.current).selectAll("*").remove();
     d3.select(chartRef.current).selectAll("*").remove();
