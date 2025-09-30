@@ -1,6 +1,4 @@
-import json
-import boto3
-import datetime
+import json, boto3, datetime
 from zoneinfo import ZoneInfo
 from bisect import bisect_left
 
@@ -10,8 +8,7 @@ def lambda_handler(event, context):
     bris = ZoneInfo("Australia/Brisbane")
     now_bris = datetime.datetime.now(bris)
 
-
-    yesterday = now_bris - datetime.timedelta(days=1)
+    yesterday = (now_bris - datetime.timedelta(days=1)).date()
     ydate = yesterday.strftime("%Y-%m-%d")
     yprefix = f"GC{ydate}"
 
@@ -19,21 +16,21 @@ def lambda_handler(event, context):
     forecast_bucket = "forecast-wind"
     analysis_bucket = "analysis-wind"
 
-    # load yesterdays actual data
+    # read actual data
     record_key = f"{yprefix}.json"
     record_obj = s3.get_object(Bucket=record_bucket, Key=record_key)
     record_raw = json.loads(record_obj["Body"].read())
     actual_points = record_raw["observationalGraphs"]["wind"]["dataConfig"]["series"]["groups"][0]["points"]
 
-    # load forecast issued yesterday
+    # read forecast dat
     forecast_key = f"{yprefix}.json"
     forecast_obj = s3.get_object(Bucket=forecast_bucket, Key=forecast_key)
     forecast_raw = json.loads(forecast_obj["Body"].read())
 
-    start_bris = datetime.datetime.strptime(ydate, "%Y-%m-%d").replace(tzinfo=bris)
+    start_bris = datetime.datetime(yesterday.year, yesterday.month, yesterday.day, 0, 0, 0, tzinfo=bris)
     end_bris   = start_bris + datetime.timedelta(days=1)
 
-    # Collect and interpolate forecast data to 10min steps
+    # ollect forecast entries 
     raw_entries = []
     for day in forecast_raw["forecasts"]["wind"]["days"]:
         for e in day["entries"]:
@@ -45,29 +42,22 @@ def lambda_handler(event, context):
             if start_bris <= ts < end_bris:
                 raw_entries.append({
                     "ts": ts,
-                    "wind_knots": e["speed"] * 0.539957
+                    "wind_knots": e["speed"] * 0.539957  # km/h → knots
                 })
     raw_entries.sort(key=lambda p: p["ts"])
 
+    # interpolate forecast to 10 min steps
     forecast_points = []
     for a, b in zip(raw_entries, raw_entries[1:]):
-        forecast_points.append({
-            "ts": a["ts"], "x": a["ts"].strftime("%H:%M"), "wind_knots": a["wind_knots"]
-        })
+        forecast_points.append({"ts": a["ts"], "wind_knots": a["wind_knots"]})
         t = a["ts"]
         while (t + datetime.timedelta(minutes=10)) < b["ts"]:
             t += datetime.timedelta(minutes=10)
             frac = (t - a["ts"]).total_seconds() / (b["ts"] - a["ts"]).total_seconds()
-            forecast_points.append({
-                "ts": t,
-                "x": t.strftime("%H:%M"),
-                "wind_knots": a["wind_knots"] + frac * (b["wind_knots"] - a["wind_knots"])
-            })
+            interp_val = a["wind_knots"] + frac * (b["wind_knots"] - a["wind_knots"])
+            forecast_points.append({"ts": t, "wind_knots": interp_val})
     if raw_entries:
-        last = raw_entries[-1]
-        forecast_points.append({
-            "ts": last["ts"], "x": last["ts"].strftime("%H:%M"), "wind_knots": last["wind_knots"]
-        })
+        forecast_points.append(raw_entries[-1])
 
     forecast_times = [f["ts"] for f in forecast_points]
     forecast_knots = [f["wind_knots"] for f in forecast_points]
@@ -77,28 +67,31 @@ def lambda_handler(event, context):
             return None
         i = bisect_left(forecast_times, ts)
         if i == 0:
-            return forecast_knots[0] if abs((forecast_times[0] - ts).total_seconds())/60 <= 5 else None
+            return forecast_knots[0]
         if i == len(forecast_times):
-            return forecast_knots[-1] if abs((ts - forecast_times[-1]).total_seconds())/60 <= 5 else None
+            return forecast_knots[-1]
         before, after = forecast_times[i-1], forecast_times[i]
-        bdiff = abs((ts - before).total_seconds())/60
-        adiff = abs((after - ts).total_seconds())/60
-        return forecast_knots[i-1] if bdiff <= adiff and bdiff <= 5 else (forecast_knots[i] if adiff <= 5 else None)
+        if abs((ts - before).total_seconds()) <= abs((after - ts).total_seconds()):
+            return forecast_knots[i-1]
+        return forecast_knots[i]
 
-    # merge actual & predicted by nearest time
+    # Merge 
     merged = []
     for p in actual_points:
-        ts = datetime.datetime.fromtimestamp(p["x"], tz=datetime.timezone.utc).astimezone(bris)
+        # ⚠️ Treat obs x as already Brisbane local (WillyWeather quirk!)
+        ts = datetime.datetime.utcfromtimestamp(p["x"]).replace(tzinfo=bris)
+        if not (start_bris <= ts < end_bris):
+            continue
         merged.append({
-            "x": ts.strftime("%H:%M"),
-            "actual": p["y"] * 0.539957,
+            "time": ts.isoformat(),        # full ISO timestamp with timezone
+            "actual": p["y"] * 0.539957,   # km/h → knots
             "predicted": find_nearest_forecast(ts)
         })
 
-    # save to analysis bucket
+    # save
     out = {
         "metadata": {
-            "title": "Gold Coast Seaway Wind Data",
+            "station": "Gold Coast Seaway",
             "unit": "knots",
             "date": ydate
         },
