@@ -1,0 +1,168 @@
+import json, os, datetime, requests, boto3
+from zoneinfo import ZoneInfo
+from bisect import bisect_left
+
+s3 = boto3.resource("s3")
+BASE_URL = "https://api.willyweather.com.au/v2/"
+
+def lambda_handler(event, context):
+    print("=== current-wind + analysis Lambda START ===")
+
+    api_key    = os.environ["WW_API_KEY"]
+    station_id = "18591"
+    bris       = ZoneInfo("Australia/Brisbane")
+    now_bris   = datetime.datetime.now(bris)
+    today      = now_bris.strftime("%Y-%m-%d")
+    today_key  = f"GC{today}.json"
+
+    # ---------- 1) Fetch live data with startDate = yesterday (to cover 00:00 Brisbane)
+    obs        = "wind,wind-gust"
+    start_for_api = (now_bris - datetime.timedelta(days=1)).strftime("%Y-%m-%d")  # yesterday
+    url        = f"{BASE_URL}{api_key}/locations/{station_id}/weather.json"
+    params     = {"observationalGraphs": obs, "startDate": start_for_api}
+    print("Requesting observationalGraphs…", url, params)
+
+    r = requests.get(url, params=params, timeout=15)
+    r.raise_for_status()
+    raw = r.json()
+    print("Fetched keys:", list(raw.get("observationalGraphs", {}).keys()))
+
+    # ---------- 2) Save current-wind trimmed to Brisbane midnight → now
+    start_bris = datetime.datetime.strptime(today, "%Y-%m-%d").replace(tzinfo=bris)
+    trimmed = json.loads(json.dumps(raw))  # shallow copy
+    earliest, latest = None, None
+
+    for g in trimmed["observationalGraphs"].values():
+        for s in g["dataConfig"]["series"]["groups"]:
+            pts = []
+            for p in s["points"]:
+                ts_bris = datetime.datetime.fromtimestamp(p["x"], tz=datetime.timezone.utc).astimezone(bris)
+                if start_bris <= ts_bris <= now_bris:
+                    pts.append(p)
+                    if earliest is None or ts_bris < earliest: earliest = ts_bris
+                    if latest   is None or ts_bris > latest:   latest   = ts_bris
+            s["points"] = pts
+
+    s3.meta.client.upload_file(_dump_tmp(trimmed, today_key), "current-wind", today_key)
+    print(f"Saved current-wind/{today_key}")
+    if earliest and latest:
+        print(f"Current-wind coverage (Brisbane): {earliest.strftime('%H:%M')} → {latest.strftime('%H:%M')}")
+
+    # ---------- 3) Prepare API response: last 12 hours (for frontend)
+    wind_points = raw["observationalGraphs"]["wind"]["dataConfig"]["series"]["groups"][0]["points"]
+    gust_points = raw["observationalGraphs"]["wind-gust"]["dataConfig"]["series"]["groups"][0]["points"]
+    now_utc     = datetime.datetime.now(datetime.timezone.utc)
+    cutoff      = now_utc - datetime.timedelta(hours=12)
+
+    graph_12h = []
+    for i, p in enumerate(wind_points):
+        ts_utc = datetime.datetime.fromtimestamp(p["x"], tz=datetime.timezone.utc)
+        if ts_utc >= cutoff:
+            gust = gust_points[i]["y"] * 0.539957 if i < len(gust_points) else None
+            graph_12h.append({
+                "x": ts_utc.astimezone(bris).strftime("%H:%M"),
+                "wind_knots": p["y"] * 0.539957,
+                "direction_degrees": p.get("direction"),
+                "direction_text": p.get("directionText"),
+                "wind_gust_knots": gust
+            })
+    print(f"Last-12h points returned to client: {len(graph_12h)}")
+
+    # ---------- 4) Build and save TODAY’s analysis (actual vs forecast)
+    # Fetch forecast (save too so you can inspect)
+    fc_resp = requests.get(
+        f"{BASE_URL}{api_key}/locations/{station_id}/weather.json",
+        params={"forecasts": "wind", "days": 2}, timeout=15
+    )
+    fc_resp.raise_for_status()
+    forecast_raw = fc_resp.json()
+    s3.meta.client.upload_file(_dump_tmp(forecast_raw, today_key), "forecast-wind", today_key)
+
+    # Actual points for today (from trimmed)
+    actual_points = trimmed["observationalGraphs"]["wind"]["dataConfig"]["series"]["groups"][0]["points"]
+    end_bris      = start_bris + datetime.timedelta(days=1)
+
+    # Collect forecast entries for today (Brisbane-based)
+    fc_entries = []
+    for day in forecast_raw["forecasts"]["wind"]["days"]:
+        for e in day["entries"]:
+            ts = datetime.datetime.fromisoformat(e["dateTime"])
+            ts = ts.replace(tzinfo=bris) if ts.tzinfo is None else ts.astimezone(bris)
+            if start_bris <= ts < end_bris:
+                fc_entries.append({"ts": ts, "wind_knots": e["speed"] * 0.539957})
+    fc_entries.sort(key=lambda p: p["ts"])
+
+    # Interpolate forecast to 10-min steps
+    fc_points = []
+    for a, b in zip(fc_entries, fc_entries[1:]):
+        fc_points.append({"ts": a["ts"], "wind_knots": a["wind_knots"]})
+        t = a["ts"]
+        while (t + datetime.timedelta(minutes=10)) < b["ts"]:
+            t += datetime.timedelta(minutes=10)
+            frac = (t - a["ts"]).total_seconds() / (b["ts"] - a["ts"]).total_seconds()
+            fc_points.append({
+                "ts": t,
+                "wind_knots": a["wind_knots"] + frac * (b["wind_knots"] - a["wind_knots"])
+            })
+    if fc_entries:
+        last = fc_entries[-1]
+        fc_points.append({"ts": last["ts"], "wind_knots": last["wind_knots"]})
+
+    fc_times = [f["ts"] for f in fc_points]
+    fc_knots = [f["wind_knots"] for f in fc_points]
+
+    def nearest_fc(ts):
+        if not fc_times: return None
+        i = bisect_left(fc_times, ts)
+        if i == 0:
+            return fc_knots[0] if abs((fc_times[0] - ts).total_seconds()) <= 300 else None
+        if i == len(fc_times):
+            return fc_knots[-1] if abs((ts - fc_times[-1]).total_seconds()) <= 300 else None
+        before, after = fc_times[i-1], fc_times[i]
+        return fc_knots[i-1] if abs((ts - before).total_seconds()) <= abs((after - ts).total_seconds()) else fc_knots[i]
+
+    merged = []
+    first_m, last_m = None, None
+    for p in actual_points:
+        ts = datetime.datetime.fromtimestamp(p["x"], tz=datetime.timezone.utc).astimezone(bris)
+        if start_bris <= ts <= now_bris:
+            merged.append({
+                "x": ts.strftime("%H:%M"),
+                "actual": p["y"] * 0.539957,
+                "predicted": nearest_fc(ts)
+            })
+            if first_m is None: first_m = ts
+            last_m = ts
+
+    analysis_out = {
+        "metadata": {"title": "Gold Coast Seaway Wind Data", "unit": "knots", "date": today},
+        "data": merged
+    }
+    s3.meta.client.upload_file(_dump_tmp(analysis_out, today_key), "analysis-wind", today_key)
+    if first_m and last_m:
+        print(f"Analysis coverage (Brisbane): {first_m.strftime('%H:%M')} → {last_m.strftime('%H:%M')}  points={len(merged)}")
+
+    # ---------- 5) Return current 12-hour data for frontend
+    print("=== current-wind + analysis Lambda END ===")
+    return {
+        "statusCode": 200,
+        "headers": {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET,OPTIONS",
+            "Content-Type": "application/json",
+        },
+        "body": json.dumps({
+            "metadata": {
+                "title": f"{raw.get('location', {}).get('name', 'Gold Coast Seaway')} Wind Data",
+                "unit": "knots",
+                "date": now_utc.strftime("%Y-%m-%d")
+            },
+            "data": graph_12h
+        })
+    }
+
+def _dump_tmp(data, key):
+    path = f"/tmp/{key}"
+    with open(path, "w") as f:
+        json.dump(data, f)
+    return path
