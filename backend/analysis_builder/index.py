@@ -78,13 +78,13 @@ def lambda_handler(event, context):
     # Merge 
     merged = []
     for p in actual_points:
-        # ⚠️ Treat obs x as already Brisbane local (WillyWeather quirk!)
+        # treat as already Brisbane local 
         ts = datetime.datetime.utcfromtimestamp(p["x"]).replace(tzinfo=bris)
         if not (start_bris <= ts < end_bris):
             continue
         merged.append({
             "time": ts.isoformat(),        # full ISO timestamp with timezone
-            "actual": p["y"] * 0.539957,   # km/h → knots
+            "actual": p["y"] * 0.539957,   #  knots
             "predicted": find_nearest_forecast(ts)
         })
 

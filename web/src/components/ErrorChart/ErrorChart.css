@@ -28,8 +28,8 @@
   background: #fff;
 
   position: fixed;
-  left: 0; /* Will be set inline from TSX */
-  top: 0;  /* Will be set inline from TSX */
+  left: 0; 
+  top: 0;  
 
   border: 1px solid #ccc;
   border-radius: 8px;
@@ -39,6 +39,22 @@
   z-index: 10;
   min-width: 120px;
 
+}
+
+.chart-legend {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #444;
+  text-align: center;
+}
+
+.chart-legend .legend-item {
+  margin-right: 20px;
+}
+
+.chart-legend .legend-line {
+  font-weight: bold;
+  margin-right: 4px;
 }
 
 
