@@ -31,7 +31,7 @@ const Layout = () => {
   
   return (
     <div className="app-container">
-      <div className="main-container" key={pathname}>
+      <div className="main-container" >
         <Navigation />
         <ScrollToTop />
         <Outlet />

@@ -117,7 +117,7 @@ const Analysis: React.FC = () => {
     <div className="analysis-page">
       <div className="page-content">
         <h1>Analysis Wind Data</h1>
-        <p>Comparison of forecast vs actual wind for today and recent days.</p>
+        <p>Comparison of forecast vs actual wind</p>
 
         {/* LINE */}
         {loadingLine && <p>Loading analysis data...</p>}
