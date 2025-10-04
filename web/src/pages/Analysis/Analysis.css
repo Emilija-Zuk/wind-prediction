@@ -1,21 +1,45 @@
 .analysis-page {
   min-height: 100vh;
   display: flex;
-  align-items: flex-start; 
   justify-content: center;
-  text-align: center;
+  align-items: flex-start;
+
  
+  width: 100vw;
+  max-width: 100vw;
+  box-sizing: border-box;
+  padding: 0.5rem;     
+  overflow-x: hidden;
+
+  text-align: center;
 }
 
 
-/* .page-content h1 {
-  color: #1e293b;
-  margin-bottom: 1rem;
-  font-size: 2.5rem;
-} */
+.page-content {
+  width: 100%;
+  max-width: 900px;     
+  margin: 0 auto;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  box-sizing: border-box;
+  overflow-x: hidden; 
+}
 
 .page-content p {
   color: #64748b;
   font-size: 1.1rem;
 }
 
+@media (max-width: 768px) {
+  .analysis-page {
+    padding: 0.5rem;   
+  }
+
+  .page-content {
+    max-width: 100%;
+    padding: 0;         
+  }
+}
