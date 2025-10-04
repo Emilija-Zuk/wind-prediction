@@ -78,3 +78,50 @@
     overflow: hidden;
   }
 }
+
+
+.chart-header {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.chart-header h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+
+
+
+.chart-date-picker {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.chart-date-picker input {
+  padding: 3px 6px;
+  font-size: 12px;
+  border: 1px solid #bbb;
+  border-radius: 4px;
+  background: #fff;
+  width: 120px;            
+}
+
+.chart-date-picker button {
+  padding: 4px 8px;
+  font-size: 12px;
+  cursor: pointer;
+  background: #444;         
+  color: white;
+  border: none;
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+
+.chart-date-picker button:hover {
+  background: #222;        
+}
+
