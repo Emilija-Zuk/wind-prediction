@@ -14,8 +14,7 @@ def lambda_handler(event, context):
     if graph_type == "line":
         return build_line_graph(params)
     elif graph_type == "bar":
-        print("Bar graph not implemented yet")
-        return _empty_response()
+        return build_bar_graph(params)
     elif graph_type == "scatter":
         print("Scatter graph not implemented yet")
         return _empty_response()
@@ -101,4 +100,80 @@ def _error_response(message):
         "statusCode": 400,
         "body": json.dumps({"error": message}),
         "headers": {"Content-Type": "application/json"}
+    }
+
+def build_bar_graph(params):
+    """
+    Reads analysis-wind/GCdaily.json and returns daily metrics
+    filtered by start/end (YYYY-MM-DD). Inclusive on both ends.
+    """
+    start_str = params.get("start")
+    end_str = params.get("end")
+
+    start_date = datetime.strptime(start_str, "%Y-%m-%d").date() if start_str else None
+    end_date = datetime.strptime(end_str, "%Y-%m-%d").date() if end_str else None
+
+    # Load GCdaily.json
+    try:
+        obj = s3.get_object(Bucket=ANALYSIS_BUCKET, Key="GCdaily.json")
+        body = json.loads(obj["Body"].read())
+    except Exception as e:
+        print(f"GCdaily.json not found or unreadable: {e}")
+        return _empty_response()
+
+    station = body.get("station", "Gold Coast Seaway")
+    unit = body.get("unit", "knots")
+    daily = body.get("daily", [])
+
+    # filter rows
+    data = []
+    for item in daily:
+        dstr = item.get("date")
+        if not dstr:
+            continue
+        try:
+            d = datetime.strptime(dstr, "%Y-%m-%d").date()
+        except Exception:
+            continue
+
+        if start_date and d < start_date:
+            continue
+        if end_date and d > end_date:
+            continue
+
+        # provide full metrics
+        data.append({
+            "date": dstr,
+            "n": item.get("n"),
+            "coverage": item.get("coverage"),
+            "mae": item.get("mae"),
+            "rmse": item.get("rmse"),
+            "bias": item.get("bias"),
+            "smape": item.get("smape"),
+            "mean_actual": item.get("mean_actual"),
+            "mean_predicted": item.get("mean_predicted"),
+        })
+
+    # ascending date order
+    data.sort(key=lambda r: r["date"])
+
+    final_output = {
+        "metadata": {
+            "station": station,
+            "unit": unit,
+            "graph_type": "bar",
+            "dates": [r["date"] for r in data]
+        },
+        "data": data
+    }
+
+    return {
+        "statusCode": 200,
+        "headers": {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET,OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type",
+            "Content-Type": "application/json",
+        },
+        "body": json.dumps(final_output)
     }

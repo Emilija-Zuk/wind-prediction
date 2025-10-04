@@ -1,100 +1,149 @@
 import React, { useState, useEffect } from "react";
 import "./Analysis.css";
 import ErrorChart from "../../components/ErrorChart/ErrorChart";
+import BarChart from "../../components/BarChart/BarChart";
+
+
+const fmtBris = (d: Date) =>
+  new Intl.DateTimeFormat("en-CA", { timeZone: "Australia/Brisbane" }).format(d);
+
+const addDaysStr = (yyyy_mm_dd: string, delta: number) => {
+  const [y, m, d] = yyyy_mm_dd.split("-").map(Number);
+  const t = Date.UTC(y, m - 1, d + delta);
+  return fmtBris(new Date(t));
+};
 
 const Analysis: React.FC = () => {
-  const [chartData, setChartData] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  // Defaults: end = today , start = 3 days earlier for brisbane
-  const endDefault = new Date().toLocaleDateString("en-CA", {
-    timeZone: "Australia/Brisbane",
-  });
-
-  const startDefault = new Date(
-    //  midnight in Brisbane 
-    new Date(`${endDefault}T00:00:00+10:00`).getTime() - 3 * 24 * 60 * 60 * 1000
-  ).toLocaleDateString("en-CA", { timeZone: "Australia/Brisbane" });
-
-  const [startDate, setStartDate] = useState(startDefault);
-  const [endDate, setEndDate] = useState(endDefault);
-
-
   const analysisUrl =
     "https://fydlfscjee.execute-api.ap-southeast-2.amazonaws.com/test1/analysis";
 
-  const fetchData = (start: string, end: string) => {
-    const graphType = "line";
-    const url = `${analysisUrl}?type=${graphType}&start=${start}&end=${end}`;
-    console.log("📡 Fetch URL:", url);
+  // today (Brisbane) as YYYY-MM-DD
+  const todayBris = fmtBris(new Date());
 
-    setLoading(true);
-    fetch(url, {
-      headers: { "x-api-key": process.env.REACT_APP_API_KEY1 as string },
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error(`API error: ${res.status}`);
-        return res.json();
+  // LINE defaults: end = today, start = 3 days earlier (both Brisbane)
+  const [startDateLine, setStartDateLine] = useState(addDaysStr(todayBris, -3));
+  const [endDateLine, setEndDateLine] = useState(todayBris);
+
+  // BAR defaults: start fixed to 2025-09-29, end = yesterday (Brisbane)
+  const [startDateBar, setStartDateBar] = useState("2025-09-29");
+  const [endDateBar, setEndDateBar] = useState(addDaysStr(todayBris, -1));
+
+  const [chartData, setChartData] = useState<any>(null);
+  const [chartBarData, setBarChartData] = useState<any>(null);
+
+  const [loadingLine, setLoadingLine] = useState(true);
+  const [loadingBar, setLoadingBar] = useState(false);
+
+  const [errorLine, setErrorLine] = useState<string | null>(null);
+  const [errorBar, setErrorBar] = useState<string | null>(null);
+
+  // fetchers 
+  const fetchLine = (start: string, end: string) => {
+    const url = `${analysisUrl}?type=line&start=${start}&end=${end}`;
+    console.log("Fetch LINE URL:", url);
+    setLoadingLine(true);
+    fetch(url, { headers: { "x-api-key": process.env.REACT_APP_API_KEY1 as string } })
+      .then((r) => {
+        if (!r.ok) throw new Error(`LINE ${r.status}`);
+        return r.json();
       })
       .then((data) => {
-        console.log("analysis data", data);
         setChartData(data);
-        setError(null);
+        setErrorLine(null);
       })
-      .catch((err) => {
-        console.error("Failed to load analysis data:", err);
-        setError("Failed to load analysis data.");
+      .catch((e) => {
+        console.error(e);
+        setErrorLine("Failed to load analysis data.");
       })
-      .finally(() => setLoading(false));
+      .finally(() => setLoadingLine(false));
   };
 
+  const fetchBar = (start: string, end: string) => {
+    const url = `${analysisUrl}?type=bar&start=${start}&end=${end}`;
+    console.log("Fetch BAR URL:", url);
+    setLoadingBar(true);
+    fetch(url, { headers: { "x-api-key": process.env.REACT_APP_API_KEY1 as string } })
+      .then((r) => {
+        if (!r.ok) throw new Error(`BAR ${r.status}`);
+        return r.json();
+      })
+      .then((data) => {
+        setBarChartData(data);
+        setErrorBar(null);
+      })
+      .catch((e) => {
+        console.error(e);
+        setErrorBar("Failed to load bar data.");
+      })
+      .finally(() => setLoadingBar(false));
+  };
+
+  // initial load
   useEffect(() => {
-    fetchData(startDate, endDate);
+    fetchLine(startDateLine, endDateLine);
+    fetchBar(startDateBar, endDateBar);
+  
   }, []);
 
-  const handleDateChange = (type: "start" | "end", value: string) => {
-    if (type === "start") {
-      setStartDate(value);
-    } else {
-      setEndDate(value);
-    }
+  // line handlers
+  const handleLineDateChange = (type: "start" | "end", value: string) => {
+    if (type === "start") setStartDateLine(value);
+    else setEndDateLine(value);
+  };
+  const handleLineApply = () => {
+    const s = new Date(startDateLine);
+    const e = new Date(endDateLine);
+    const days = (e.getTime() - s.getTime()) / 86_400_000;
+    if (days < 0) return alert("End date must be after start date.");
+    if (days > 7) return alert("Please select a maximum of 7 days.");
+    fetchLine(startDateLine, endDateLine);
   };
 
-  const handleApply = () => {
-    const s = new Date(startDate);
-    const e = new Date(endDate);
-    const diffDays = (e.getTime() - s.getTime()) / (1000 * 60 * 60 * 24);
-
-    if (diffDays < 0) {
-      alert("End date must be after start date.");
-      return;
-    }
-    if (diffDays > 7) {
-      alert("Please select a maximum of 7 days.");
-      return;
-    }
-
-    fetchData(startDate, endDate);
+  // ---- bar handlers ----
+  const handleBarDateChange = (type: "start" | "end", value: string) => {
+    if (type === "start") setStartDateBar(value);
+    else setEndDateBar(value);
+  };
+  const handleBarApply = () => {
+    const s = new Date(startDateBar);
+    const e = new Date(endDateBar);
+    const days = (e.getTime() - s.getTime()) / 86_400_000;
+    if (days < 0) return alert("End date must be after start date.");
+    if (days > 31) return alert("Please select a maximum of 31 days.");
+    fetchBar(startDateBar, endDateBar);
   };
 
   return (
     <div className="analysis-page">
       <div className="page-content">
         <h1>Analysis Wind Data</h1>
-        <p>
-          Comparison of forecast vs actual wind for today and recent days.
-        </p>
-        {loading && <p>Loading analysis data...</p>}
-        {error && <p className="error">{error}</p>}
-        {!loading && !error && chartData && chartData.data && (
+        <p>Comparison of forecast vs actual wind for today and recent days.</p>
+
+        {/* LINE */}
+        {loadingLine && <p>Loading analysis data...</p>}
+        {errorLine && <p className="error">{errorLine}</p>}
+        {!loadingLine && !errorLine && chartData?.data && (
           <ErrorChart
             data={chartData.data}
             title="Analysis Wind Data"
-            startDate={startDate}
-            endDate={endDate}
-            onDateChange={handleDateChange}
-            onApply={handleApply}
+            startDate={startDateLine}
+            endDate={endDateLine}
+            onDateChange={handleLineDateChange}
+            onApply={handleLineApply}
+          />
+        )}
+
+        {/* BAR */}
+        <h1>Daily Error (MAE)</h1>
+        {loadingBar && <p>Loading bar data...</p>}
+        {errorBar && <p className="error">{errorBar}</p>}
+        {!loadingBar && !errorBar && chartBarData?.data && (
+          <BarChart
+            data={chartBarData.data}
+            startDate={startDateBar}
+            endDate={endDateBar}
+            onDateChange={handleBarDateChange}
+            onApply={handleBarApply}
           />
         )}
       </div>
