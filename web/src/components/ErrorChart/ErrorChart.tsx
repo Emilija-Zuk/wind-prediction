@@ -6,9 +6,21 @@ interface ErrorChartProps {
   data: Array<{ time: string; actual: number; predicted: number }>;
   title?: string;
   className?: string;
+  startDate?: string;
+  endDate?: string;
+  onDateChange?: (type: "start" | "end", value: string) => void;
+  onApply?: () => void;
 }
 
-const ErrorChart: React.FC<ErrorChartProps> = ({ data, title, className = "" }) => {
+const ErrorChart: React.FC<ErrorChartProps> = ({
+  data,
+  title,
+  className = "",
+  startDate,
+  endDate,
+  onDateChange,
+  onApply,
+}) => {
   const yAxisRef = useRef<SVGSVGElement>(null);
   const chartRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -40,7 +52,7 @@ const ErrorChart: React.FC<ErrorChartProps> = ({ data, title, className = "" }) 
     const innerWidth = containerWidth - margin.left - margin.right;
     const height = 200;
 
-    // === convert data to Date objects from ISO time ===
+    // convert data to date objects from ISO time ===
     const chartData = data.map(d => ({
       time: new Date(d.time),
       actual: d.actual,
@@ -63,7 +75,6 @@ const ErrorChart: React.FC<ErrorChartProps> = ({ data, title, className = "" }) 
       (isMobile ? 1 : 0.98);
 
     const xScale = d3.scaleTime().domain([dataStart, dataEnd]).range([0, chartWidth]);
-
     const yScale = d3.scaleLinear().domain([0, 30]).range([height, 0]);
 
     // y-axis
@@ -157,13 +168,8 @@ const ErrorChart: React.FC<ErrorChartProps> = ({ data, title, className = "" }) 
       .attr("stroke-width", 2)
       .attr("d", linePredicted as any);
 
-
-
-      
-
-   // === Midnight vertical lines + date labels ===
-    const dayStarts = d3.timeDay.range(dataStart, dataEnd); // all midnights between start and end
-
+    // midnight lines and date labels
+    const dayStarts = d3.timeDay.range(dataStart, dataEnd);
     dayStarts.forEach(d => {
       chartGroup.append("line")
         .attr("x1", xScale(d))
@@ -181,7 +187,6 @@ const ErrorChart: React.FC<ErrorChartProps> = ({ data, title, className = "" }) 
         .style("fill", "gray")
         .text(d3.timeFormat("%Y-%m-%d")(d));
     });
-      
 
     // tooltip
     const getNearestData = (mx: number) => {
@@ -223,7 +228,7 @@ const ErrorChart: React.FC<ErrorChartProps> = ({ data, title, className = "" }) 
       .on("touchmove", showTooltip)
       .on("touchend", () => setTooltip(t => ({ ...t, visible: false })));
 
-    // auto-scroll to latest
+    // scroll to latest
     if (scrollRef.current && chartRef.current) {
       setTimeout(() => {
         const visibleWidth = scrollRef.current!.clientWidth;
@@ -238,6 +243,27 @@ const ErrorChart: React.FC<ErrorChartProps> = ({ data, title, className = "" }) 
       className={`chart-container ${isMobile ? "mobile-chart" : ""} ${className}`}
       ref={containerRef}
     >
+     
+      <div className="chart-header">
+  
+   
+        {startDate && endDate && onDateChange && onApply && (
+          <div className="chart-date-picker">
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => onDateChange("start", e.target.value)}
+            />
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => onDateChange("end", e.target.value)}
+            />
+            <button onClick={onApply}>Apply</button>
+          </div>
+        )}
+      </div>
+
       <div style={{ display: "flex" }}>
         <svg ref={yAxisRef} style={{ flexShrink: 0 }}></svg>
         <div
@@ -248,16 +274,15 @@ const ErrorChart: React.FC<ErrorChartProps> = ({ data, title, className = "" }) 
         </div>
       </div>
 
-          {/* Legend  */}
+      {/* Legend */}
       <div className="chart-legend">
         <span className="legend-item">
           <span className="legend-line" style={{ color: "steelblue" }}>─</span> Actual
         </span>
         <span className="legend-item">
-          <span className="legend-line" style={{ color: "orange" }}>─</span> Predicted
+          <span className="legend-line" style={{ color: "orange" }}>─</span> Forecast
         </span>
       </div>
-
 
       {tooltip.visible && tooltip.data && (
         <div
@@ -269,21 +294,13 @@ const ErrorChart: React.FC<ErrorChartProps> = ({ data, title, className = "" }) 
               ? tooltip.x < window.innerWidth / 2
                 ? { left: tooltip.x + 20 }
                 : { right: window.innerWidth - tooltip.x + 20 }
-              : { left: tooltip.x + 20 })
+              : { left: tooltip.x + 20 }),
           }}
         >
-          <div>
-            Time: <b>{tooltip.data.time}</b>
-          </div>
-          <div>
-            Actual: <b>{tooltip.data.actual} kn</b>
-          </div>
-          <div>
-            Predicted: <b>{tooltip.data.predicted} kn</b>
-          </div>
-          <div>
-            Error: <b>{tooltip.data.error} kn</b>
-          </div>
+          <div>Time: <b>{tooltip.data.time}</b></div>
+          <div>Actual: <b>{tooltip.data.actual} kn</b></div>
+          <div>Predicted: <b>{tooltip.data.predicted} kn</b></div>
+          <div>Error: <b>{tooltip.data.error} kn</b></div>
         </div>
       )}
     </div>

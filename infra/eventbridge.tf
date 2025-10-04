@@ -25,7 +25,7 @@ resource "aws_lambda_permission" "allow_eventbridge_record_wind" {
 
 resource "aws_cloudwatch_event_rule" "analysis_builder_daily" {
   name                = "analysis-builder-daily"
-  schedule_expression = "cron(15 14 * * ? *)"  # 00:15 Brisbane (AEST/AEDT)
+  schedule_expression = "cron(15 14 * * ? *)" # 00:15 Brisbane (AEST/AEDT)
   description         = "Invoke analysis_builder Lambda every day at 00:15 Brisbane time"
 }
 
