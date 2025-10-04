@@ -1,45 +1,21 @@
 .analysis-page {
   min-height: 100vh;
   display: flex;
+  align-items: flex-start; 
   justify-content: center;
-  align-items: flex-start;
-
-  /* keep page within the viewport and avoid sideways scroll */
-  width: 100vw;
-  max-width: 100vw;
-  box-sizing: border-box;
-  padding: 0.5rem;      /* small gutters like Predictions */
-  overflow-x: hidden;
-
   text-align: center;
+ 
 }
 
-/* page inner wrapper */
-.page-content {
-  width: 100%;
-  max-width: 900px;     /* or 100% if you prefer full bleed */
-  margin: 0 auto;
 
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-
-  box-sizing: border-box;
-  overflow-x: hidden;   /* belt & suspenders */
-}
+/* .page-content h1 {
+  color: #1e293b;
+  margin-bottom: 1rem;
+  font-size: 2.5rem;
+} */
 
 .page-content p {
   color: #64748b;
   font-size: 1.1rem;
 }
 
-@media (max-width: 768px) {
-  .analysis-page {
-    padding: 0.5rem;    /* keep the small gutters on mobile */
-  }
-
-  .page-content {
-    max-width: 100%;
-    padding: 0;         /* charts already have their own padding */
-  }
-}
