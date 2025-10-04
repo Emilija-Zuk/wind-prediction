@@ -5,7 +5,6 @@
   width: 100%;
   max-width: 800px;
   min-width: 300px;
-  /* box-sizing: border-box; */
   overflow: hidden;
 }
 
@@ -14,23 +13,16 @@
   display: block;
 }
 
-.grid line {
-  stroke: #ddd;
-}
-
-.grid path {
-  stroke-width: 0;
-}
+.grid line { stroke: #ddd; }
+.grid path { stroke-width: 0; }
 
 .wind-tooltip {
   font-size: 15px;
   color: #222;
   background: #fff;
-
   position: fixed;
-  left: 0; 
-  top: 0;  
-
+  left: 0;
+  top: 0;
   border: 1px solid #ccc;
   border-radius: 8px;
   padding: 10px 16px;
@@ -38,7 +30,6 @@
   pointer-events: none;
   z-index: 10;
   min-width: 120px;
-
 }
 
 .chart-legend {
@@ -47,25 +38,12 @@
   color: #444;
   text-align: center;
 }
-
-.chart-legend .legend-item {
-  margin-right: 20px;
-}
-
-.chart-legend .legend-line {
-  font-weight: bold;
-  margin-right: 4px;
-}
-
-
+.chart-legend .legend-item { margin-right: 20px; }
+.chart-legend .legend-line { font-weight: bold; margin-right: 4px; }
 
 @media (max-width: 1280px) {
-  .chart-container {
-    width: 95vw;
-    max-width: 95vw;
-  }
+  .chart-container { width: 95vw; max-width: 95vw; }
 }
-
 @media (max-width: 768px) {
   .chart-container {
     width: calc(100vw - 1rem);
@@ -79,10 +57,9 @@
   }
 }
 
-
 .chart-header {
   display: flex;
-  justify-content: flex-end;
+  justify-content: flex-end;  
   align-items: center;
   margin-bottom: 6px;
 }
@@ -93,8 +70,6 @@
 }
 
 
-
-
 .chart-date-picker {
   display: flex;
   gap: 6px;
@@ -102,26 +77,26 @@
 }
 
 .chart-date-picker input {
-  padding: 3px 6px;
-  font-size: 12px;
-  border: 1px solid #bbb;
+  padding: 5px 8px;
+  font-size: 13px;
+  border: 1px solid #cbd5e1;
   border-radius: 4px;
   background: #fff;
-  width: 120px;            
+ 
 }
 
-.chart-date-picker button {
-  padding: 4px 8px;
-  font-size: 12px;
-  cursor: pointer;
-  background: #444;         
-  color: white;
+.chart-container .chart-date-picker button {
+  background: #1f2937 !important;  /* same as .bar-apply */
+  color: #fff !important;
   border: none;
+  padding: 5px 10px;
+  font-size: 13px;
   border-radius: 4px;
-  transition: background 0.2s ease;
+  cursor: pointer;
+  transition: opacity .2s ease;
 }
 
-.chart-date-picker button:hover {
-  background: #222;        
+.chart-container .chart-date-picker button:hover {
+  opacity: .9;
 }
 
