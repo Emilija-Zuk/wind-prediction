@@ -303,6 +303,12 @@ const ErrorChart: React.FC<ErrorChartProps> = ({
     };
   }, [data, isMobile]);
 
+  // position tooltip left/right  and clear the opposite side
+  const posStyle =
+    tooltip.x < window.innerWidth / 2
+      ? { left: tooltip.x + 20, right: "auto" as const }
+      : { left: "auto" as const, right: window.innerWidth - tooltip.x + 20 };
+
   return (
     <div
       className={`chart-container ${isMobile ? "mobile-chart" : ""} ${className}`}
@@ -349,11 +355,7 @@ const ErrorChart: React.FC<ErrorChartProps> = ({
           style={{
             position: "fixed",
             top: tooltip.y - 100,
-            ...(isMobile
-              ? tooltip.x < window.innerWidth / 2
-                ? { left: tooltip.x + 20 }
-                : { right: window.innerWidth - tooltip.x + 20 }
-              : { left: tooltip.x + 20 }),
+            ...posStyle, // choose left or right and clear the other
           }}
         >
           <div>Time: <b>{tooltip.data.time}</b></div>
