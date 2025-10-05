@@ -46,18 +46,19 @@ const Predictions: React.FC = () => {
   return (
     <div className="predictions-page">
       <div className="page-content">
-              <button
+
+        <h1>Live Wind Report Gold Coast Seaway</h1>
+        
+        <button
                 className="refresh-button"
                 onClick={refreshCurrent}
                 disabled={loading}
               >
-          {loading ? "Refreshing…" : "Refresh Current Wind"}
-        </button>
-        <h1>Live Wind Report Gold Coast Seaway</h1>
+          {loading ? "Refreshing…" : "Refresh"}
+        </button> 
 
 
         <WindChart data={chartData.data} />
-
 
         <h1>Forecast Wind</h1>
         {forecastData
