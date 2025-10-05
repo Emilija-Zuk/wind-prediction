@@ -25,6 +25,7 @@ const ErrorChart: React.FC<ErrorChartProps> = ({
   const chartRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+
   const [isMobile, setIsMobile] = useState(false);
   const [tooltip, setTooltip] = useState<{
     visible: boolean;
@@ -33,11 +34,57 @@ const ErrorChart: React.FC<ErrorChartProps> = ({
     data?: { actual: number; predicted: number; time: string; error: number };
   }>({ visible: false, x: 0, y: 0 });
 
+  // tooltip helpers 
+  const hideTimer = useRef<number | null>(null);
+  const clearHideTimer = () => {
+    if (hideTimer.current != null) {
+      window.clearTimeout(hideTimer.current);
+      hideTimer.current = null;
+    }
+  };
+  const hideNow = () => {
+    clearHideTimer();
+    setTooltip((t) => ({ ...t, visible: false }));
+  };
+  const scheduleHide = (ms = 1000) => {
+    clearHideTimer();
+    hideTimer.current = window.setTimeout(() => {
+      setTooltip((t) => ({ ...t, visible: false }));
+      hideTimer.current = null;
+    }, ms);
+  };
+
   useEffect(() => {
     const checkResize = () => setIsMobile(window.innerWidth <= 768);
     checkResize();
     window.addEventListener("resize", checkResize);
     return () => window.removeEventListener("resize", checkResize);
+  }, []);
+
+  // hide tooltip when clicking or tapping anywhere outside the card
+  useEffect(() => {
+    const onDocPointerDown = (e: PointerEvent) => {
+      const host = containerRef.current;
+      if (!host) return;
+      if (!host.contains(e.target as Node)) hideNow();
+    };
+    document.addEventListener("pointerdown", onDocPointerDown, true);
+    return () => document.removeEventListener("pointerdown", onDocPointerDown, true);
+  }, []);
+
+  // hide when clicking in the card but not on the chart svgs ( date pickers or header)
+  useEffect(() => {
+    const host = containerRef.current;
+    const onHostPointerDown = (e: PointerEvent) => {
+      const inChart =
+        (chartRef.current && chartRef.current.contains(e.target as Node)) ||
+        (yAxisRef.current && yAxisRef.current.contains(e.target as Node));
+      if (!inChart) hideNow();
+    };
+    if (host) {
+      host.addEventListener("pointerdown", onHostPointerDown, true);
+      return () => host.removeEventListener("pointerdown", onHostPointerDown, true);
+    }
   }, []);
 
   useEffect(() => {
@@ -52,40 +99,33 @@ const ErrorChart: React.FC<ErrorChartProps> = ({
     const innerWidth = containerWidth - margin.left - margin.right;
     const height = 200;
 
-    // convert data to date objects from ISO time ===
-    const chartData = data.map(d => ({
+    // convert data to date objects from ISO time
+    const chartData = data.map((d) => ({
       time: new Date(d.time),
       actual: d.actual,
-      predicted: d.predicted
+      predicted: d.predicted,
     }));
 
     if (!chartData.length) return;
 
-    // determine full time span of data
-    const [dataStart, dataEnd] = d3.extent(chartData, d => d.time) as [Date, Date];
+    // time span and dynamic width
+    const [dataStart, dataEnd] = d3.extent(chartData, (d) => d.time) as [Date, Date];
     const dataSpanMs = dataEnd.getTime() - dataStart.getTime();
-
-    // how many hours should fill the visible width
     const baseHoursVisible = isMobile ? 5 : 12;
     const visibleSpanMs = baseHoursVisible * 3600_000;
-
-    // width so baseHoursVisible fills the viewport, but still fits all data
     const chartWidth =
-      Math.max(innerWidth, innerWidth * (dataSpanMs / visibleSpanMs)) *
-      (isMobile ? 1 : 0.98);
+      Math.max(innerWidth, innerWidth * (dataSpanMs / visibleSpanMs)) * (isMobile ? 1 : 0.98);
 
     const xScale = d3.scaleTime().domain([dataStart, dataEnd]).range([0, chartWidth]);
     const yScale = d3.scaleLinear().domain([0, 30]).range([height, 0]);
 
-    // y-axis
+    // y-axis svg
     const yAxis = d3
       .select(yAxisRef.current)
       .attr("width", margin.left)
       .attr("height", height + margin.top + margin.bottom);
 
-    const yGroup = yAxis
-      .append("g")
-      .attr("transform", `translate(${margin.left},${margin.top})`);
+    const yGroup = yAxis.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
     yGroup.append("g").call(d3.axisLeft(yScale).tickValues([0, 5, 10, 15, 20, 25, 30]));
     yGroup
       .append("text")
@@ -96,13 +136,25 @@ const ErrorChart: React.FC<ErrorChartProps> = ({
       .style("font-size", "14px")
       .text("Wind Speed (knots)");
 
-    // main chart
+    // main chart svg
     const chart = d3
       .select(chartRef.current)
       .attr("width", chartWidth)
       .attr("height", height + margin.top + margin.bottom);
 
     const chartGroup = chart.append("g").attr("transform", `translate(0,${margin.top})`);
+
+    // background capture to hide on empty area clicks leaves
+    chartGroup
+      .append("rect")
+      .attr("class", "bg-capture")
+      .attr("x", 0)
+      .attr("y", 0)
+      .attr("width", chartWidth)
+      .attr("height", height)
+      .attr("fill", "transparent")
+      .on("pointerdown", () => hideNow())
+      .on("pointerleave", () => hideNow());
 
     // x-axis
     chartGroup
@@ -111,26 +163,22 @@ const ErrorChart: React.FC<ErrorChartProps> = ({
       .call(
         d3
           .axisBottom(xScale)
-          .tickFormat(d => d3.timeFormat("%H:%M")(d as Date))
+          .tickFormat((d) => d3.timeFormat("%H:%M")(d as Date))
           .ticks(d3.timeHour.every(1))
       );
 
     // grid lines
     chartGroup
       .append("g")
-      .call(
-        d3
-          .axisBottom(xScale)
-          .tickSize(-height)
-          .tickFormat(() => "")
-          .ticks(d3.timeHour.every(1))
-      )
+      .attr("class", "grid-x")
+      .call(d3.axisBottom(xScale).tickSize(-height).tickFormat(() => "").ticks(d3.timeHour.every(1)))
       .attr("transform", `translate(0,${height})`)
       .style("stroke-dasharray", "3,3")
       .style("opacity", 0.1);
 
     chartGroup
       .append("g")
+      .attr("class", "grid-y")
       .call(
         d3
           .axisLeft(yScale)
@@ -144,17 +192,18 @@ const ErrorChart: React.FC<ErrorChartProps> = ({
     // actual & predicted lines
     const lineActual = d3
       .line<{ time: Date; actual: number }>()
-      .x(d => xScale(d.time))
-      .y(d => yScale(d.actual));
+      .x((d) => xScale(d.time))
+      .y((d) => yScale(d.actual));
 
     const linePredicted = d3
       .line<{ time: Date; predicted: number }>()
-      .x(d => xScale(d.time))
-      .y(d => yScale(d.predicted));
+      .x((d) => xScale(d.time))
+      .y((d) => yScale(d.predicted));
 
     chartGroup
       .append("path")
       .datum(chartData)
+      .attr("class", "line-actual")
       .attr("fill", "none")
       .attr("stroke", "steelblue")
       .attr("stroke-width", 2)
@@ -163,6 +212,7 @@ const ErrorChart: React.FC<ErrorChartProps> = ({
     chartGroup
       .append("path")
       .datum(chartData)
+      .attr("class", "line-forecast")
       .attr("fill", "none")
       .attr("stroke", "orange")
       .attr("stroke-width", 2)
@@ -170,8 +220,9 @@ const ErrorChart: React.FC<ErrorChartProps> = ({
 
     // midnight lines and date labels
     const dayStarts = d3.timeDay.range(dataStart, dataEnd);
-    dayStarts.forEach(d => {
-      chartGroup.append("line")
+    dayStarts.forEach((d) => {
+      chartGroup
+        .append("line")
         .attr("x1", xScale(d))
         .attr("x2", xScale(d))
         .attr("y1", 0)
@@ -180,7 +231,8 @@ const ErrorChart: React.FC<ErrorChartProps> = ({
         .attr("stroke-dasharray", "4,4")
         .style("opacity", 0.4);
 
-      chartGroup.append("text")
+      chartGroup
+        .append("text")
         .attr("x", xScale(d) + 4)
         .attr("y", -5)
         .style("font-size", "13px")
@@ -188,7 +240,7 @@ const ErrorChart: React.FC<ErrorChartProps> = ({
         .text(d3.timeFormat("%Y-%m-%d")(d));
     });
 
-    // tooltip
+    // tooltip (nearest)
     const getNearestData = (mx: number) => {
       const bisect = d3.bisector((d: any) => d.time).left;
       const x0 = xScale.invert(mx);
@@ -197,12 +249,8 @@ const ErrorChart: React.FC<ErrorChartProps> = ({
       const d1 = chartData[idx];
       if (!d0) return d1;
       if (!d1) return d0;
-      return x0.getTime() - d0.time.getTime() > d1.time.getTime() - x0.getTime()
-        ? d1
-        : d0;
+      return x0.getTime() - d0.time.getTime() > d1.time.getTime() - x0.getTime() ? d1 : d0;
     };
-
-    const svg = d3.select(chartRef.current);
 
     function showTooltip(event: any) {
       const [mx] = d3.pointer(event);
@@ -216,17 +264,24 @@ const ErrorChart: React.FC<ErrorChartProps> = ({
           actual: Math.round(nearest.actual),
           predicted: Math.round(nearest.predicted),
           error: Math.round(nearest.actual - nearest.predicted),
-          time: d3.timeFormat("%Y-%m-%d %H:%M")(nearest.time)
-        }
+          time: d3.timeFormat("%Y-%m-%d %H:%M")(nearest.time),
+        },
       });
+      scheduleHide(1000);
     }
 
-    svg
+    // svg-level immediate hide behaviors
+    chart
+      .on("pointerleave", () => hideNow())
+      .on("pointerdown", (event: PointerEvent) => {
+        const el = event.target as Element;
+        // If click wasn't on the charted lines, hide immediately
+        if (!el.closest(".line-actual, .line-forecast")) hideNow();
+      })
       .on("mousemove", showTooltip)
-      .on("mouseleave", () => setTooltip(t => ({ ...t, visible: false })))
       .on("touchstart", showTooltip)
       .on("touchmove", showTooltip)
-      .on("touchend", () => setTooltip(t => ({ ...t, visible: false })));
+      .on("touchend", () => hideNow());
 
     // scroll to latest
     if (scrollRef.current && chartRef.current) {
@@ -236,6 +291,16 @@ const ErrorChart: React.FC<ErrorChartProps> = ({
         scrollRef.current!.scrollLeft = Math.max(0, fullWidth - visibleWidth);
       }, 100);
     }
+
+    return () => {
+      clearHideTimer();
+      chart.on(".pointerleave", null);
+      chart.on(".pointerdown", null);
+      chart.on("mousemove", null);
+      chart.on("touchstart", null);
+      chart.on("touchmove", null);
+      chart.on("touchend", null);
+    };
   }, [data, isMobile]);
 
   return (
@@ -243,10 +308,7 @@ const ErrorChart: React.FC<ErrorChartProps> = ({
       className={`chart-container ${isMobile ? "mobile-chart" : ""} ${className}`}
       ref={containerRef}
     >
-     
       <div className="chart-header">
-  
-   
         {startDate && endDate && onDateChange && onApply && (
           <div className="chart-date-picker">
             <input
@@ -265,12 +327,9 @@ const ErrorChart: React.FC<ErrorChartProps> = ({
       </div>
 
       <div style={{ display: "flex" }}>
-        <svg ref={yAxisRef} style={{ flexShrink: 0 }}></svg>
-        <div
-          ref={scrollRef}
-          style={{ overflowX: "auto", overflowY: "hidden", flexGrow: 1 }}
-        >
-          <svg ref={chartRef}></svg>
+        <svg ref={yAxisRef} style={{ flexShrink: 0 }} />
+        <div ref={scrollRef} style={{ overflowX: "auto", overflowY: "hidden", flexGrow: 1 }}>
+          <svg ref={chartRef} />
         </div>
       </div>
 

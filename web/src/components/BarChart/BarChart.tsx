@@ -16,7 +16,7 @@ type DailyRow = {
 
 interface BarChartProps {
   data: DailyRow[];
-  title?: string;            // ignored 
+  title?: string;            // ignored
   className?: string;
   startDate?: string;        // YYYY-MM-DD
   endDate?: string;          // YYYY-MM-DD
@@ -38,20 +38,64 @@ const BarChart: React.FC<BarChartProps> = ({
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const [isMobile, setIsMobile] = useState(false);
-  const [tooltip, setTooltip] = useState<{ visible: boolean; x: number; y: number; d?: DailyRow; }>(
-    { visible: false, x: 0, y: 0 }
-  );
+  const [tooltip, setTooltip] = useState<{
+    visible: boolean;
+    x: number;
+    y: number;
+    d?: DailyRow;
+  }>({ visible: false, x: 0, y: 0 });
 
-  // auto-hide tooltip after 1s
+  //  tooltip helpers 
   const hideTimer = useRef<number | null>(null);
-  const clearHideTimer = () => { if (hideTimer.current != null) { window.clearTimeout(hideTimer.current); hideTimer.current = null; } };
-  const scheduleHide = () => { clearHideTimer(); hideTimer.current = window.setTimeout(() => setTooltip(t => ({ ...t, visible: false })), 1000); };
+  const clearHideTimer = () => {
+    if (hideTimer.current != null) {
+      window.clearTimeout(hideTimer.current);
+      hideTimer.current = null;
+    }
+  };
+  const hideNow = () => {
+    clearHideTimer();
+    setTooltip((t) => ({ ...t, visible: false }));
+  };
+  const scheduleHide = (ms = 1000) => {
+    clearHideTimer();
+    hideTimer.current = window.setTimeout(() => {
+      setTooltip((t) => ({ ...t, visible: false }));
+      hideTimer.current = null;
+    }, ms);
+  };
 
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth <= 768);
     onResize();
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  // hide tooltip when clicking or tapping anywhere outside the card
+  useEffect(() => {
+    const onDocPointerDown = (e: PointerEvent) => {
+      const host = containerRef.current;
+      if (!host) return;
+      if (!host.contains(e.target as Node)) hideNow();
+    };
+    document.addEventListener("pointerdown", onDocPointerDown, true);
+    return () => document.removeEventListener("pointerdown", onDocPointerDown, true);
+  }, []);
+
+  //  hide when clicking in the card but not on the chart svgs ( date pickers or header)
+  useEffect(() => {
+    const host = containerRef.current;
+    const onHostPointerDown = (e: PointerEvent) => {
+      const inChart =
+        (chartRef.current && chartRef.current.contains(e.target as Node)) ||
+        (yAxisRef.current && yAxisRef.current.contains(e.target as Node));
+      if (!inChart) hideNow();
+    };
+    if (host) {
+      host.addEventListener("pointerdown", onHostPointerDown, true);
+      return () => host.removeEventListener("pointerdown", onHostPointerDown, true);
+    }
   }, []);
 
   useEffect(() => {
@@ -78,20 +122,22 @@ const BarChart: React.FC<BarChartProps> = ({
     const chartWidth = Math.max(innerWidth, neededWidth);
     const barWidth = Math.floor((chartWidth - (rows.length - 1) * gap) / rows.length);
     const xPos = (i: number) => i * (barWidth + gap);
-    const xCenter = (i: number) => xPos(i) + barWidth / 2;
 
     // Y scale
-    const yMax = Math.max(10, d3.max(rows, r => r.mae || 0) || 0) * 1.15;
+    const yMax = Math.max(10, d3.max(rows, (r) => r.mae || 0) || 0) * 1.15;
     const y = d3.scaleLinear().domain([0, yMax]).nice().range([height, 0]);
 
-
+    // left Y axis svg
     const yAxisSvg = d3
       .select(yAxisRef.current)
       .attr("width", margin.left)
       .attr("height", height + margin.top + margin.bottom);
 
     const yG = yAxisSvg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
-    yG.append("g").call(d3.axisLeft(y).ticks(6).tickSizeOuter(0)).selectAll("text").style("font-size", "12px");
+    yG.append("g")
+      .call(d3.axisLeft(y).ticks(6).tickSizeOuter(0))
+      .selectAll("text")
+      .style("font-size", "12px");
     yG.append("text")
       .attr("transform", "rotate(-90)")
       .attr("y", -42)
@@ -100,21 +146,32 @@ const BarChart: React.FC<BarChartProps> = ({
       .attr("class", "bar-ylabel")
       .text("MAE (knots)");
 
-    // Main chart
+    
     const svg = d3
       .select(chartRef.current)
       .attr("width", chartWidth)
       .attr("height", height + margin.top + margin.bottom);
 
-    // translate ONLY by top margin 
+    // translate ONLY by top margin
     const g = svg.append("g").attr("transform", `translate(0,${margin.top})`);
+
+    // background capture (clicks or leave on empty plot area hide immediately)
+    g.append("rect")
+      .attr("class", "bg-capture")
+      .attr("x", 0)
+      .attr("y", 0)
+      .attr("width", chartWidth)
+      .attr("height", height)
+      .attr("fill", "transparent")
+      .on("pointerdown", () => hideNow())
+      .on("pointerleave", () => hideNow());
 
     // Grid
     g.append("g")
       .attr("class", "bar-grid")
       .call(d3.axisLeft(y).ticks(6).tickSize(-chartWidth).tickFormat(() => "" as any));
 
-    // X axis at bar centers 
+    // X axis (centered to bars)
     const xCenterScale = d3
       .scaleLinear()
       .domain([0, rows.length - 1])
@@ -133,23 +190,24 @@ const BarChart: React.FC<BarChartProps> = ({
       .style("font-size", "12px");
 
     // color by bias sign
-    const color = (b: number) => (b > 0.1 ? "var(--bar-pos)" : b < -0.1 ? "var(--bar-neg)" : "var(--bar-zero)");
+    const color = (b: number) =>
+      b > 0.1 ? "var(--bar-pos)" : b < -0.1 ? "var(--bar-neg)" : "var(--bar-zero)";
 
     const showTip = (event: any, d: DailyRow) => {
       const clientX = event?.clientX ?? event?.touches?.[0]?.clientX ?? 0;
       const clientY = event?.clientY ?? event?.touches?.[0]?.clientY ?? 0;
       setTooltip({ visible: true, x: clientX, y: clientY, d });
-      scheduleHide();
+      scheduleHide(1000);
     };
 
-    
+    // Bars
     const bars = g
       .selectAll(".bar-rect")
       .data(rows, (d: any) => d.date)
       .enter()
       .append("rect")
       .attr("class", "bar-rect")
-      .attr("x", (_, i) => xPos(i))
+      .attr("x", (_: any, i: number) => xPos(i))
       .attr("y", (d) => y(d.mae || 0))
       .attr("width", barWidth)
       .attr("height", (d) => height - y(d.mae || 0))
@@ -157,11 +215,25 @@ const BarChart: React.FC<BarChartProps> = ({
       .on("mousemove", (e, d) => showTip(e, d))
       .on("touchstart", (e, d) => showTip(e, d))
       .on("touchmove", (e, d) => showTip(e, d))
-      .on("mouseleave", () => { clearHideTimer(); setTooltip((t) => ({ ...t, visible: false })); })
-      .on("touchend", () => { clearHideTimer(); setTooltip((t) => ({ ...t, visible: false })); });
+      .on("mouseleave", () => hideNow())
+      .on("touchend", () => hideNow());
 
-    bars.on("mouseenter", function () { d3.select(this).attr("stroke", "#111").attr("stroke-width", 1); });
-    bars.on("mouseleave", function () { d3.select(this).attr("stroke", "none"); });
+    bars
+      .on("mouseenter", function () {
+        d3.select(this).attr("stroke", "#111").attr("stroke-width", 1);
+      })
+      .on("mouseleave", function () {
+        d3.select(this).attr("stroke", "none");
+      });
+
+    // hide if pointer leaves the whole SVG
+    svg.on("pointerleave", () => hideNow());
+
+    // hide if clicking inside the SVG but not on a bar
+    svg.on("pointerdown", (event: PointerEvent) => {
+      const el = event.target as Element;
+      if (!el.closest(".bar-rect")) hideNow();
+    });
 
     // autoscroll to most recent
     if (scrollRef.current && chartRef.current) {
@@ -172,7 +244,11 @@ const BarChart: React.FC<BarChartProps> = ({
       }, 100);
     }
 
-    return () => clearHideTimer();
+    return () => {
+      clearHideTimer();
+      svg.on(".pointerleave", null);
+      svg.on(".pointerdown", null);
+    };
   }, [data, isMobile]);
 
   return (
@@ -204,14 +280,20 @@ const BarChart: React.FC<BarChartProps> = ({
       </div>
 
       {tooltip.visible && tooltip.d && (
-        <div className="bar-tooltip" style={{ position: "fixed", top: tooltip.y - 110, left: tooltip.x + 18 }}>
+        <div
+          className="bar-tooltip"
+          style={{ position: "fixed", top: tooltip.y - 110, left: tooltip.x + 18 }}
+        >
           <div className="tt-date">{tooltip.d.date}</div>
           <div>n: <b>{tooltip.d.n}</b> (coverage {(tooltip.d.coverage * 100).toFixed(1)}%)</div>
           <div>MAE: <b>{tooltip.d.mae.toFixed(2)} kn</b></div>
           <div>RMSE: <b>{tooltip.d.rmse.toFixed(2)} kn</b></div>
           <div>Bias: <b>{tooltip.d.bias.toFixed(2)} kn</b></div>
           <div>sMAPE: <b>{(tooltip.d.smape * 100).toFixed(1)}%</b></div>
-          <div>Mean A/P: <b>{tooltip.d.mean_actual.toFixed(2)}</b> / <b>{tooltip.d.mean_predicted.toFixed(2)}</b></div>
+          <div>
+            Mean A/P: <b>{tooltip.d.mean_actual.toFixed(2)}</b> /{" "}
+            <b>{tooltip.d.mean_predicted.toFixed(2)}</b>
+          </div>
         </div>
       )}
     </div>
