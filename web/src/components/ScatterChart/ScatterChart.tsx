@@ -14,7 +14,7 @@ interface ScatterChartProps {
   onApply?: () => void;
 }
 
-/**  Brisbane formatter: "YYYY-MM-DD HH:mm" */
+/** Brisbane formatter: "YYYY-MM-DD HH:mm" */
 const fmtPartsBris = new Intl.DateTimeFormat("en-CA", {
   timeZone: "Australia/Brisbane",
   year: "numeric",
@@ -53,15 +53,27 @@ const ScatterChart: React.FC<ScatterChartProps> = ({
     p?: { time: string; actual: number; predicted: number; err: number };
   }>({ visible: false, x: 0, y: 0 });
 
+  // ---- tooltip timers / helpers ----
   const hideTimer = useRef<number | null>(null);
-  const scheduleHide = () => {
-    if (hideTimer.current) window.clearTimeout(hideTimer.current);
-    hideTimer.current = window.setTimeout(
-      () => setTooltip((t) => ({ ...t, visible: false })),
-      1800
-    );
+  const clearHideTimer = () => {
+    if (hideTimer.current) {
+      window.clearTimeout(hideTimer.current);
+      hideTimer.current = null;
+    }
+  };
+  const hideNow = () => {
+    clearHideTimer();
+    setTooltip((t) => ({ ...t, visible: false }));
+  };
+  const scheduleHide = (ms = 1000) => {
+    clearHideTimer();
+    hideTimer.current = window.setTimeout(() => {
+      setTooltip((t) => ({ ...t, visible: false }));
+      hideTimer.current = null;
+    }, ms);
   };
 
+  // Resize flag
   useEffect(() => {
     const onR = () => setIsMobile(window.innerWidth <= 768);
     onR();
@@ -69,7 +81,7 @@ const ScatterChart: React.FC<ScatterChartProps> = ({
     return () => window.removeEventListener("resize", onR);
   }, []);
 
- 
+  // Clean, finite points
   const points = useMemo(
     () =>
       (data || [])
@@ -88,6 +100,17 @@ const ScatterChart: React.FC<ScatterChartProps> = ({
         })),
     [data]
   );
+
+  // Hide on click/tap outside the chart container
+  useEffect(() => {
+    const onDocPointerDown = (e: PointerEvent) => {
+      const host = containerRef.current;
+      if (!host) return;
+      if (!host.contains(e.target as Node)) hideNow();
+    };
+    document.addEventListener("pointerdown", onDocPointerDown, true);
+    return () => document.removeEventListener("pointerdown", onDocPointerDown, true);
+  }, []);
 
   useEffect(() => {
     if (!svgRef.current || !containerRef.current) return;
@@ -116,6 +139,17 @@ const ScatterChart: React.FC<ScatterChartProps> = ({
     const x = d3.scaleLinear().domain([vMin, vMax]).range([0, width]).nice();
     const y = d3.scaleLinear().domain([vMin, vMax]).range([height, 0]).nice();
 
+    // Background rect to catch pointer events (click/leave not on dots)
+    g.append("rect")
+      .attr("class", "bg-capture")
+      .attr("x", 0)
+      .attr("y", 0)
+      .attr("width", width)
+      .attr("height", height)
+      .attr("fill", "transparent")
+      .on("pointerdown", () => hideNow())
+      .on("pointerleave", () => hideNow());
+
     // Grid
     g.append("g")
       .attr("class", "scatter-grid")
@@ -135,7 +169,7 @@ const ScatterChart: React.FC<ScatterChartProps> = ({
       .selectAll("text")
       .style("font-size", "12px");
 
-    // axis labels
+    // Axis labels
     g.append("text")
       .attr("class", "scatter-axis-label")
       .attr("x", width / 2)
@@ -180,22 +214,17 @@ const ScatterChart: React.FC<ScatterChartProps> = ({
       .attr("r", r)
       .attr("fill", (d) => color(d.p - d.a))
       .attr("opacity", 0.85)
-      .on("mousemove", function (event, d) {
+      .on("mousemove", (event, d) => {
         setTooltip({
           visible: true,
           x: event.clientX,
           y: event.clientY,
           p: { time: d.time, actual: d.a, predicted: d.p, err: d.a - d.p },
         });
-        scheduleHide();
+        scheduleHide(1000);
       })
-      .on("mouseleave", () =>
-        setTooltip((t) => {
-          if (hideTimer.current) scheduleHide();
-          return { ...t, visible: false };
-        })
-      )
-      .on("touchstart", function (event: any, d) {
+      .on("mouseleave", () => hideNow())
+      .on("touchstart", (event: any, d) => {
         const touch = event.touches?.[0];
         setTooltip({
           visible: true,
@@ -203,17 +232,28 @@ const ScatterChart: React.FC<ScatterChartProps> = ({
           y: touch?.clientY ?? 0,
           p: { time: d.time, actual: d.a, predicted: d.p, err: d.a - d.p },
         });
-        scheduleHide();
+        scheduleHide(1000);
       });
 
+    // hide if pointer leaves the whole SVG
+    svg.on("pointerleave", () => hideNow());
+
+    // hide if clicking inside the SVG but not on a circle
+    svg.on("pointerdown", (event: PointerEvent) => {
+      const el = event.target as Element;
+      if (el && el.tagName.toLowerCase() !== "circle") hideNow();
+    });
+
     return () => {
-      if (hideTimer.current) window.clearTimeout(hideTimer.current);
+      clearHideTimer();
+      svg.on(".pointerleave", null);
+      svg.on(".pointerdown", null);
     };
   }, [points, isMobile]);
 
   return (
     <div className={`scatter-container ${className}`} ref={containerRef}>
-
+      {/* Right aligned date pickers*/}
       <div className="scatter-header scatter-header-right">
         {startDate && endDate && onDateChange && onApply && (
           <div className="scatter-date-picker">
@@ -236,7 +276,7 @@ const ScatterChart: React.FC<ScatterChartProps> = ({
 
       <svg ref={svgRef} />
 
-   
+      {/* Legend  */}
       <div className="scatter-legend">
         <span className="legend-item">
           <span className="legend-swatch swatch-pos" /> Over-forecast (bias &gt; 0)
