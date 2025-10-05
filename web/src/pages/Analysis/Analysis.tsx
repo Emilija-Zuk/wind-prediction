@@ -30,14 +30,21 @@ const Analysis: React.FC = () => {
   const [startDateBar, setStartDateBar] = useState("2025-09-29");
   const [endDateBar, setEndDateBar] = useState(addDaysStr(todayBris, -1));
 
+    // Scatter defaults: start fixed to 2025-09-29, end = yesterday (Brisbane)
+  const [startDateScatter, setStartDateScatter] = useState("2025-09-29");
+  const [endDateScatter, setEndDateScatter] = useState(addDaysStr(todayBris, -1));
+
   const [chartData, setChartData] = useState<any>(null);
   const [chartBarData, setBarChartData] = useState<any>(null);
+  const [chartScatterData, setScatterChartData] = useState<any>(null);
 
   const [loadingLine, setLoadingLine] = useState(true);
   const [loadingBar, setLoadingBar] = useState(false);
+  const [loadingScatter, setLoadingScatter] = useState(false);
 
   const [errorLine, setErrorLine] = useState<string | null>(null);
   const [errorBar, setErrorBar] = useState<string | null>(null);
+  const [errorScatter, setErrorScatter] = useState<string | null>(null);
 
   // fetchers 
   const fetchLine = (start: string, end: string) => {
@@ -80,10 +87,33 @@ const Analysis: React.FC = () => {
       .finally(() => setLoadingBar(false));
   };
 
+  const fetchScatter = (start: string, end: string) => {
+    const url = `${analysisUrl}?type=line&start=${start}&end=${end}`;
+    console.log("Fetch scatter URL:", url);
+    setLoadingScatter(true);
+    fetch(url, { headers: { "x-api-key": process.env.REACT_APP_API_KEY1 as string } })
+      .then((r) => {
+        if (!r.ok) throw new Error(`Scatter ${r.status}`);
+        return r.json();
+      })
+      .then((data) => {
+        setScatterChartData(data);
+        setErrorScatter(null);
+      })
+      .catch((e) => {
+        console.error(e);
+        setErrorScatter("Failed to load scatter data.");
+      })
+      .finally(() => setLoadingScatter(false));
+  };
+
+
+
   // initial load
   useEffect(() => {
     fetchLine(startDateLine, endDateLine);
     fetchBar(startDateBar, endDateBar);
+    fetchScatter(startDateScatter, endDateScatter);
   
   }, []);
 
@@ -115,6 +145,20 @@ const Analysis: React.FC = () => {
     fetchBar(startDateBar, endDateBar);
   };
 
+
+// scatter handlers
+  const handleScatterDateChange = (type: "start" | "end", value: string) => {
+    if (type === "start") setStartDateScatter(value);
+    else setEndDateScatter(value);
+  };
+  const handleScatterApply = () => {
+    const s = new Date(startDateScatter);
+    const e = new Date(endDateScatter);
+    const days = (e.getTime() - s.getTime()) / 86_400_000;
+    if (days < 0) return alert("End date must be after start date.");
+    if (days > 7) return alert("Please select a maximum of 7 days.");
+    fetchScatter(startDateScatter, endDateScatter);
+  };
   return (
     <div className="analysis-page">
       <div className="page-content">
@@ -149,17 +193,19 @@ const Analysis: React.FC = () => {
           />
         )}
 
-{/* SCATTER */}
-<h1>Forecast vs Actual (Scatter)</h1>
-{!loadingLine && !errorLine && chartData?.data && (
-  <ScatterChart
-    data={chartData.data}             // same data as ErrorChart for now
-    startDate={startDateLine}        
-    endDate={endDateLine}
-    onDateChange={handleLineDateChange}
-    onApply={handleLineApply}         
-  />
-)}
+        {/* SCATTER */}
+        <h1>Forecast vs Actual (Scatter)</h1>
+        {loadingScatter && <p>Loading scatter data...</p>}
+{errorScatter && <p className="error">{errorScatter}</p>}
+        {!loadingScatter && !errorScatter && chartScatterData?.data && (
+          <ScatterChart
+            data={chartScatterData.data}           
+            startDate={startDateScatter}        
+            endDate={endDateScatter}
+            onDateChange={handleScatterDateChange}
+            onApply={handleScatterApply}         
+          />
+        )}
 
 
       </div>
