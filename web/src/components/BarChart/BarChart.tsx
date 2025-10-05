@@ -282,7 +282,13 @@ const BarChart: React.FC<BarChartProps> = ({
       {tooltip.visible && tooltip.d && (
         <div
           className="bar-tooltip"
-          style={{ position: "fixed", top: tooltip.y - 110, left: tooltip.x + 18 }}
+          style={{
+            position: "fixed",
+            top: tooltip.y - 110,
+            // flip tooltip side based on pointer x
+            left: tooltip.x <= window.innerWidth / 2 ? tooltip.x + 18 : undefined,
+            right: tooltip.x > window.innerWidth / 2 ? window.innerWidth - tooltip.x + 18 : undefined,
+          }}
         >
           <div className="tt-date">{tooltip.d.date}</div>
           <div>n: <b>{tooltip.d.n}</b> (coverage {(tooltip.d.coverage * 100).toFixed(1)}%)</div>

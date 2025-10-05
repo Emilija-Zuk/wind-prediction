@@ -292,7 +292,9 @@ const ScatterChart: React.FC<ScatterChartProps> = ({
           style={{
             position: "fixed",
             top: tooltip.y - 110,
-            left: tooltip.x + 18,
+            // flip tooltip side based on pointer x
+            left: tooltip.x <= window.innerWidth / 2 ? tooltip.x + 18 : undefined,
+            right: tooltip.x > window.innerWidth / 2 ? window.innerWidth - tooltip.x + 18 : undefined,
           }}
         >
           <div className="tt-date">{formatBris(tooltip.p.time)}</div>
