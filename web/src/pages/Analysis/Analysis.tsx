@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import "./Analysis.css";
 import ErrorChart from "../../components/ErrorChart/ErrorChart";
 import BarChart from "../../components/BarChart/BarChart";
+import ScatterChart from "../../components/ScatterChart/ScatterChart";
+
 
 
 const fmtBris = (d: Date) =>
@@ -99,7 +101,7 @@ const Analysis: React.FC = () => {
     fetchLine(startDateLine, endDateLine);
   };
 
-  // ---- bar handlers ----
+  // bar handlers 
   const handleBarDateChange = (type: "start" | "end", value: string) => {
     if (type === "start") setStartDateBar(value);
     else setEndDateBar(value);
@@ -146,6 +148,20 @@ const Analysis: React.FC = () => {
             onApply={handleBarApply}
           />
         )}
+
+{/* SCATTER */}
+<h1>Forecast vs Actual (Scatter)</h1>
+{!loadingLine && !errorLine && chartData?.data && (
+  <ScatterChart
+    data={chartData.data}             // same data as ErrorChart for now
+    startDate={startDateLine}        
+    endDate={endDateLine}
+    onDateChange={handleLineDateChange}
+    onApply={handleLineApply}         
+  />
+)}
+
+
       </div>
     </div>
   );
