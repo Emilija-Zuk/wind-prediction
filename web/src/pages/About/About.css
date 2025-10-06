@@ -1,18 +1,119 @@
 .about-page {
   min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
+  padding: 2rem 1rem;
+  background: #fafbfc;
 }
 
-/* .page-content h1 {
-  color: #1e293b;
-  margin-bottom: 1rem;
-  font-size: 2.5rem;
-} */
+.about-content {
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: left;
+  line-height: 1.8;
+}
 
-.page-content p {
-  color: #64748b;
+.about-content h1 {
+  text-align: center;
+  color: #1e293b;
+  font-size: 2.5rem;
+  margin-bottom: 2rem;
+  font-weight: 700;
+}
+
+.about-content p {
+  color: #475569;
   font-size: 1.1rem;
+  line-height: 1.8;
+  margin-bottom: 1.2rem;
+  text-align: justify;
+}
+
+.about-image {
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  margin: 1rem;
+}
+
+.about-image:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.float-right {
+  float: right;
+  width: 280px;
+  height: auto;
+  margin-left: 2rem;
+  margin-bottom: 1rem;
+}
+
+.float-left {
+  float: left;
+  width: 280px;
+  height: auto;
+  margin-right: 2rem;
+  margin-bottom: 1rem;
+}
+
+.first-image {
+  margin-top: 0;
+}
+
+.center-image {
+  display: block;
+  width: 100%;
+  max-width: 600px;
+  height: auto;
+  margin: 2rem auto;
+  clear: both;
+}
+
+.bottom-wide-image {
+  display: block;
+  width: 100%;
+  max-width: 800px;
+  height: auto;
+  margin: 2rem auto 1rem auto;
+}
+
+.clearfix {
+  clear: both;
+}
+
+@media (max-width: 768px) {
+  .about-content {
+    max-width: 800px;
+  }
+  
+  .about-content h1 {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .about-content p {
+    font-size: 1rem;
+    text-align: left;
+    margin-bottom: 1rem;
+  }
+  
+  .float-right,
+  .float-left {
+    float: none;
+    display: block;
+    width: 100%;
+    max-width: 300px;
+    margin: 1rem auto;
+  }
+  
+  .center-image {
+    max-width: 100%;
+  }
+  
+  .bottom-wide-image {
+    max-width: 100%;
+  }
+  
+  .about-page {
+    padding: 1rem 0.5rem;
+  }
 }

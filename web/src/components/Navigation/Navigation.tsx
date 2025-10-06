@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import "./Navigation.css";
+import Logo from "../Logo/Logo";
 
 const Navigation: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -32,8 +33,8 @@ const Navigation: React.FC = () => {
   return (
     <nav className="navigation" ref={navRef}>
       <div className="nav-logo">
-        <Link to="/">
-          <img src="/images/logo.png?v=2" alt="Em's Apps Logo" className="logo-img" />
+      <Link to="/">
+          <Logo />
         </Link>
       </div>
 

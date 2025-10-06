@@ -6,6 +6,9 @@ import IntroText from "../../components/IntroText/IntroText";
 import Buttons from "../../components/Buttons/Buttons";
 import About from "../../components/About/About";
 
+import "./Home.css";
+
+
 const Home: React.FC = () => {
   return (
     <div className="main-section">
