@@ -4,14 +4,14 @@ import "./Logo.css";
 const Logo: React.FC = () => (
   <div className="logo-container">
     <svg
-      width="220"     // Increased from 190
-      height="72"     // Increased from 62
+      width="220"
+      height="72"
       viewBox="0 0 300 80"
       xmlns="http://www.w3.org/2000/svg"
       className="logo-img"
       role="img"
       aria-label="em logo"
-      style={{ verticalAlign: 'middle' }}
+      style={{ verticalAlign: "middle" }}
     >
       <defs>
         <linearGradient id="brandOrange" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -58,12 +58,23 @@ const Logo: React.FC = () => (
 
       <g clipPath="url(#clipE)">
         <rect x="57.5" y="1.5" width="100" height="80" fill="#000" opacity="0.22" />
-      </g>
-      <g clipPath="url(#clipE)">
         <rect x="50" y="0" width="110" height="80" fill="url(#brandOrange)" />
+        <rect x="52" y="0" width="12" height="80" fill="url(#eEdgeGrad)" />
       </g>
-      <text x="56" y="65" fontFamily="Poppins, sans-serif" fontWeight="900" fontSize="70" fill="none" stroke="rgba(0,0,0,0.18)" strokeWidth="0.7" paintOrder="stroke">E</text>
-      <rect x="52" y="0" width="12" height="80" fill="url(#eEdgeGrad)" clipPath="url(#clipE)" pointerEvents="none" />
+      <text
+        x="56"
+        y="65"
+        fontFamily="Poppins, sans-serif"
+        fontWeight="900"
+        fontSize="70"
+        fill="none"
+        stroke="#6B7280"
+        strokeWidth="0.9"
+        paintOrder="stroke"
+        opacity="0.7"
+      >
+        E
+      </text>
 
       <g clipPath="url(#clipM)">
         <rect x="86" y="46" width="56" height="32" fill="url(#brandOrange)" />

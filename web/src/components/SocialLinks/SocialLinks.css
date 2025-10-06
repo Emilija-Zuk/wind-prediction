@@ -1,0 +1,77 @@
+.social-links {
+  position: absolute;
+  top: 6rem;
+  right: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  z-index: 100;
+}
+
+.social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  color: #374151;
+  text-decoration: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(8px);
+}
+
+.social-link:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.social-link.linkedin:hover {
+  color: #0077b5;
+}
+
+.social-link.email:hover {
+  color: #ea4335;
+}
+
+.social-link.github:hover {
+  color: #333;
+}
+
+
+@media (max-width: 768px) {
+  .social-links {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    top: auto;
+    flex-direction: row;
+    justify-content: center;
+    gap: 1.5rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+  }
+  
+  .social-link {
+    width: 44px;
+    height: 44px;
+    position: static;
+  }
+  
+  .social-link svg {
+    width: 20px;
+    height: 20px;
+  }
+
+
+  body {
+    padding-bottom: 80px;
+  }
+}
