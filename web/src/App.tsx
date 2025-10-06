@@ -10,6 +10,7 @@ import {
 import "./App.css";
 
 import Navigation from "./components/Navigation/Navigation";
+import SocialLinks from "./components/SocialLinks/SocialLinks";
 import Home from "./pages/Home/Home";
 import Predictions from "./pages/Predictions/Predictions";
 import Analysis from "./pages/Analysis/Analysis";
@@ -26,13 +27,13 @@ const ScrollToTop = () => {
 };
 
 const Layout = () => {
-
   const { pathname } = useLocation();
   
   return (
     <div className="app-container">
       <div className="main-container" >
         <Navigation />
+        <SocialLinks />
         <ScrollToTop />
         <Outlet />
       </div>
