@@ -52,20 +52,13 @@ const Logo: React.FC = () => (
       <path d="M45 10 L10 40 L45 70" stroke="url(#brandOrange)" strokeWidth="10.5" fill="none" strokeLinecap="round" strokeLinejoin="round" filter="url(#shadow)" transform="translate(19,0)" />
       <path d="M45 10 L10 40 L45 70" stroke="url(#chevHighlight)" strokeWidth="3" fill="none" opacity="0.16" strokeLinecap="round" strokeLinejoin="round" transform="translate(19,0)" />
 
-      <text x="57.5" y="66.5" fontFamily="Poppins, sans-serif" fontWeight="900" fontSize="70" fill="#000000" opacity="0.22">E</text>
-      <text
-        x="56"
-        y="65"
-        fontFamily="Poppins, sans-serif"
-        fontWeight="900"
-        fontSize="70"
-        style={{ fill: "url(#brandOrange)" }}
-        stroke="rgba(0,0,0,0.18)"
-        strokeWidth={0.7}
-        paintOrder="stroke"
-      >
-        E
-      </text>
+      <g clipPath="url(#clipE)">
+        <rect x="57.5" y="1.5" width="100" height="80" fill="#000" opacity="0.22" />
+      </g>
+      <g clipPath="url(#clipE)">
+        <rect x="50" y="0" width="110" height="80" fill="url(#brandOrange)" />
+      </g>
+      <text x="56" y="65" fontFamily="Poppins, sans-serif" fontWeight="900" fontSize="70" fill="none" stroke="rgba(0,0,0,0.18)" strokeWidth="0.7" paintOrder="stroke">E</text>
       <rect x="52" y="0" width="12" height="80" fill="url(#eEdgeGrad)" clipPath="url(#clipE)" pointerEvents="none" />
 
       <text
