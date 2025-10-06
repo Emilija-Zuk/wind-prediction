@@ -1,0 +1,15 @@
+<!-- filepath: c:\Users\Emilija\Documents\Code\wind-prediction\web\public\favicon.svg -->
+<svg width="32" height="32" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="brandOrange" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFC066" />
+      <stop offset="35%" stop-color="#FFA733" />
+      <stop offset="65%" stop-color="#FF7A1A" />
+      <stop offset="100%" stop-color="#C44400" />
+    </linearGradient>
+  </defs>
+  
+  <path d="M15 20 L5 35 L15 50" stroke="url(#brandOrange)" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M25 20 L15 35 L25 50" stroke="url(#brandOrange)" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+  <text x="35" y="45" font-family="Arial, sans-serif" font-weight="900" font-size="35" fill="url(#brandOrange)">E</text>
+</svg>

@@ -6,7 +6,7 @@
 .title-main {
   position: relative;
   display: inline-block;
-  font-size: 3.25rem;           /* slightly smaller */
+  font-size: 3.25rem;         
   font-weight: 700;
   letter-spacing: -0.04em;
   line-height: 1.1;
@@ -17,15 +17,15 @@
   -webkit-text-fill-color: transparent;
 }
 
-/* offset underline: half under word, half beyond the right edge */
+/* offset underline*/
 .title-main::after {
   content: "";
   position: absolute;
   left: 100%;
   transform: translateX(-50%);
   bottom: -0.45rem;
-  width: 9.5rem;                /* tweak if you want longer/shorter */
-  height: 6px;
+  width: 9.5rem;                
+  height: 2px;
   border-radius: 999px;
   background: linear-gradient(90deg, #FF8A1A 0%, #FFB55E 100%);
   box-shadow: 0 1px 0 rgba(0,0,0,.06);

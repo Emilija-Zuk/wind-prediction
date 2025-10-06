@@ -16,27 +16,22 @@
   display: flex;
   align-items: center;
   margin-left: 1rem;
+  height: 100%;  
 }
 
 .nav-logo .logo-img {
-  height: 40px !important;
+  height: auto !important;      /* Let SVG control its own size */
   width: auto !important;
-  min-height: 40px !important;
-  max-height: 40px !important;
-  /* Force Chrome to recalculate */
-  transform: translateZ(0);
-  backface-visibility: hidden;
-  /* Cache busting */
-  image-rendering: -webkit-optimize-contrast;
+  max-height: 50px !important;  
+
 }
 
 /* Extra specificity for Chrome mobile */
 @media screen and (-webkit-min-device-pixel-ratio: 0) {
   .nav-logo .logo-img {
-    height: 40px !important;
-    min-height: 40px !important;
-    max-height: 40px !important;
+    height: auto !important;
     width: auto !important;
+    max-height: 50px !important; 
   }
 }
 

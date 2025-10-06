@@ -4,13 +4,14 @@ import "./Logo.css";
 const Logo: React.FC = () => (
   <div className="logo-container">
     <svg
-      width="190"
-      height="62"
-      viewBox="0 0 300 100"
+      width="220"     // Increased from 190
+      height="72"     // Increased from 62
+      viewBox="0 0 300 80"
       xmlns="http://www.w3.org/2000/svg"
       className="logo-img"
       role="img"
       aria-label="em logo"
+      style={{ verticalAlign: 'middle' }}
     >
       <defs>
         <linearGradient id="brandOrange" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -38,6 +39,9 @@ const Logo: React.FC = () => (
         <clipPath id="clipE">
           <text x="56" y="65" fontFamily="Poppins, sans-serif" fontWeight="900" fontSize="70">E</text>
         </clipPath>
+        <clipPath id="clipM">
+          <text x="90" y="74" fontFamily="Poppins, sans-serif" fontStyle="italic" fontWeight="700" fontSize="34">m</text>
+        </clipPath>
       </defs>
 
       <g opacity="0.32" stroke="#A0A8B3" strokeWidth="1">
@@ -61,20 +65,10 @@ const Logo: React.FC = () => (
       <text x="56" y="65" fontFamily="Poppins, sans-serif" fontWeight="900" fontSize="70" fill="none" stroke="rgba(0,0,0,0.18)" strokeWidth="0.7" paintOrder="stroke">E</text>
       <rect x="52" y="0" width="12" height="80" fill="url(#eEdgeGrad)" clipPath="url(#clipE)" pointerEvents="none" />
 
-      <text
-        x="90"
-        y="74"
-        fontFamily="Poppins, sans-serif"
-        fontStyle="italic"
-        fontWeight="700"
-        fontSize="34"
-        style={{ fill: "url(#brandOrange)" }}
-        stroke="rgba(0,0,0,0.18)"
-        strokeWidth={0.6}
-        paintOrder="stroke"
-      >
-        m
-      </text>
+      <g clipPath="url(#clipM)">
+        <rect x="86" y="46" width="56" height="32" fill="url(#brandOrange)" />
+      </g>
+      <text x="90" y="74" fontFamily="Poppins, sans-serif" fontStyle="italic" fontWeight="700" fontSize="34" fill="none" stroke="rgba(0,0,0,0.18)" strokeWidth="0.6" paintOrder="stroke">m</text>
     </svg>
   </div>
 );
