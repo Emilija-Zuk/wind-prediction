@@ -1,5 +1,12 @@
 import React from "react";
 import "./About.css";
+// Try using require instead of import
+const about1 = require("../../assets/images/about1.jpg");
+const about2 = require("../../assets/images/about2.jpg");
+const about3 = require("../../assets/images/about3.jpg");
+const about4 = require("../../assets/images/about4.jpg");
+const about5 = require("../../assets/images/about5.jpg");
+const about6 = require("../../assets/images/about6.jpg");
 
 const About: React.FC = () => {
   return (
@@ -7,7 +14,7 @@ const About: React.FC = () => {
       <div className="about-content">
         <h1>About Wind Prediction</h1>
         
-        <img src="/images/about1.jpg" alt="Currumbin Gold Coast kite spot" className="about-image float-right first-image" />
+        <img src={about1} alt="Currumbin Gold Coast kite spot" className="about-image float-right first-image" />
         
         <p>
           Welcome to my website! This is one of my favourite kite and surf spots in Currumbin, Gold Coast!
@@ -19,7 +26,7 @@ const About: React.FC = () => {
           only to have the wind drop! Or go for a surf in the morning when there's no wind, and suddenly it picks up once you got in the surf and waves get messy!
         </p>
 
-        <img src="/images/about2.jpg" alt="Kiting setup and wind conditions" className="about-image float-left" />
+        <img src={about2} alt="Kiting setup and wind conditions" className="about-image float-left" />
 
         <p>
           My app is designed to use machine learning and nearby weather station data to look for patterns and predict what happens 
@@ -35,15 +42,15 @@ const About: React.FC = () => {
           I believe this could help our friendly kiting community on the Gold Coast.
         </p>
 
-        <img src="/images/about3.jpg" alt="Machine learning and weather prediction" className="about-image center-image" />
+        <img src={about3} alt="Machine learning and weather prediction" className="about-image center-image" />
 
-        <img src="/images/about4.jpg" alt="Kite Safari Queensland" className="about-image float-right" />
+        <img src={about4} alt="Kite Safari Queensland" className="about-image float-right" />
         
         <p>
           If it works successfully, I could implement it for other stations! Check out my friend kiting at Kite Safari up north in Queensland!
         </p>
 
-        <img src="/images/about5.jpg" alt="Surfing holidays with friends" className="about-image float-left" />
+        <img src={about5} alt="Surfing holidays with friends" className="about-image float-left" />
         
         <p>
           I also enjoy learning to surf and going on surfing holidays with friends and meeting new friends along the way!
@@ -51,7 +58,7 @@ const About: React.FC = () => {
 
         <div className="clearfix"></div>
         
-        <img src="/images/about6.jpg" alt="Meeting new friends" className="about-image bottom-wide-image" />
+        <img src={about6} alt="Meeting new friends" className="about-image bottom-wide-image" />
       </div>
     </div>
   );

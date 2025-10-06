@@ -36,7 +36,7 @@ const Logo: React.FC = () => (
           <stop offset="100%" stopColor="#C24C00" stopOpacity="0" />
         </linearGradient>
         <clipPath id="clipE">
-          <text x="60" y="65" fontFamily="Poppins, sans-serif" fontWeight="900" fontSize="70">E</text>
+          <text x="56" y="65" fontFamily="Poppins, sans-serif" fontWeight="900" fontSize="70">E</text>
         </clipPath>
       </defs>
 
@@ -52,10 +52,36 @@ const Logo: React.FC = () => (
       <path d="M45 10 L10 40 L45 70" stroke="url(#brandOrange)" strokeWidth="10.5" fill="none" strokeLinecap="round" strokeLinejoin="round" filter="url(#shadow)" transform="translate(19,0)" />
       <path d="M45 10 L10 40 L45 70" stroke="url(#chevHighlight)" strokeWidth="3" fill="none" opacity="0.16" strokeLinecap="round" strokeLinejoin="round" transform="translate(19,0)" />
 
-      <text x="60" y="65" fontFamily="Poppins, sans-serif" fontWeight="900" fontSize="70" fill="url(#brandOrange)" stroke="rgba(0,0,0,0.18)" strokeWidth="0.7" paintOrder="stroke" filter="url(#shadow)">E</text>
-      <rect x="56" y="0" width="12" height="80" fill="url(#eEdgeGrad)" clipPath="url(#clipE)" pointerEvents="none" />
+      <text x="57.5" y="66.5" fontFamily="Poppins, sans-serif" fontWeight="900" fontSize="70" fill="#000000" opacity="0.22">E</text>
+      <text
+        x="56"
+        y="65"
+        fontFamily="Poppins, sans-serif"
+        fontWeight="900"
+        fontSize="70"
+        style={{ fill: "url(#brandOrange)" }}
+        stroke="rgba(0,0,0,0.18)"
+        strokeWidth={0.7}
+        paintOrder="stroke"
+      >
+        E
+      </text>
+      <rect x="52" y="0" width="12" height="80" fill="url(#eEdgeGrad)" clipPath="url(#clipE)" pointerEvents="none" />
 
-      <text x="94" y="74" fontFamily="Poppins, sans-serif" fontStyle="italic" fontWeight="700" fontSize="34" fill="url(#brandOrange)" stroke="rgba(0,0,0,0.18)" strokeWidth="0.6" paintOrder="stroke" filter="url(#shadow)">m</text>
+      <text
+        x="90"
+        y="74"
+        fontFamily="Poppins, sans-serif"
+        fontStyle="italic"
+        fontWeight="700"
+        fontSize="34"
+        style={{ fill: "url(#brandOrange)" }}
+        stroke="rgba(0,0,0,0.18)"
+        strokeWidth={0.6}
+        paintOrder="stroke"
+      >
+        m
+      </text>
     </svg>
   </div>
 );
