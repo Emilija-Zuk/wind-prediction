@@ -16,8 +16,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-left: 1.5rem; 
+  margin-left: 1rem; 
   height: 100%; 
+  padding-top: 2px; /* to push logo down slightly */
 }
 
 .nav-logo .logo-img {
