@@ -33,7 +33,7 @@ const Layout = () => {
     <div className="app-container">
       <div className="main-container" >
         <Navigation />
-        <SocialLinks />
+        {/* <SocialLinks /> */}
         <ScrollToTop />
         <Outlet />
       </div>

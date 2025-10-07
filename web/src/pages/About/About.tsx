@@ -4,8 +4,6 @@ import "./About.css";
 const about1 = require("../../assets/images/about1.jpg");
 const about2 = require("../../assets/images/about2.jpg");
 const about3 = require("../../assets/images/about3.jpg");
-const about4 = require("../../assets/images/about4.jpg");
-const about5 = require("../../assets/images/about5.jpg");
 const about6 = require("../../assets/images/about6.jpg");
 
 const About: React.FC = () => {
@@ -14,51 +12,51 @@ const About: React.FC = () => {
       <div className="about-content">
         <h1>About Wind Prediction</h1>
         
-        <img src={about1} alt="Currumbin Gold Coast kite spot" className="about-image float-right first-image" />
+        <div className="intro-section">
+          <img src={about1} alt="Currumbin Gold Coast kite spot" className="about-image float-right first-image" />
+          
+          <p>
+            <strong>Wind Prediction</strong> gives short-range wind guidance for the <strong>Gold Coast</strong> so kitesurfers and surfers can plan with more confidence. Public forecasts are useful, but they can miss local effects. This tool focuses on the next few hours at beach level.
+          </p>
+        </div>
+        
+        <h2>How it works</h2>
+        <ul>
+          <li>Uses supervised <strong> machine-learning models</strong> trained on historical weather data.</li>
+          <li>Blends those models with <strong>live station feeds</strong> (wind speed, gusts, direction, pressure, temperature).</li>
+          <li>Looks for upstream signals and short-term patterns to infer what comes next.</li>
+        </ul>
         
         <p>
-          Welcome to my website! This is one of my favourite kite and surf spots in Currumbin, Gold Coast!
-        </p>
-        
-        <p>
-          I decided to design wind predictions to help our fellow kiters and myself, of course, predict wind conditions more accurately. 
-          It's difficult to trust forecasts sometimes, and it's frustrating to drive half an hour to the spot, set up all your gear, 
-          only to have the wind drop! Or go for a surf in the morning when there's no wind, and suddenly it picks up once you got in the surf and waves get messy!
-        </p>
-
-        <img src={about2} alt="Kiting setup and wind conditions" className="about-image float-left" />
-
-        <p>
-          My app is designed to use machine learning and nearby weather station data to look for patterns and predict what happens 
-          within the next few hours. For example, if wind is picking up in Byron Bay, it could pick up on the Gold Coast in half an hour or so.
-        </p>
-        
-        <p>
-          I'm planning to set up the machine learning model to train every 3 hours daily with deep learning, plus quick 10-second 
-          prediction training whenever someone clicks on the predictions page!
-        </p>
-        
-        <p>
-          I believe this could help our friendly kiting community on the Gold Coast.
-        </p>
-
-        <img src={about3} alt="Machine learning and weather prediction" className="about-image center-image" />
-
-        <img src={about4} alt="Kite Safari Queensland" className="about-image float-right" />
-        
-        <p>
-          If it works successfully, I could implement it for other stations! Check out my friend kiting at Kite Safari up north in Queensland!
-        </p>
-
-        <img src={about5} alt="Surfing holidays with friends" className="about-image float-left" />
-        
-        <p>
-          I also enjoy learning to surf and going on surfing holidays with friends and meeting new friends along the way!
+          Example: rising wind in Byron Bay often arrives on the Gold Coast shortly after - the system learns and tracks that relationship.
         </p>
 
         <div className="clearfix"></div>
+
+        <img src={about2} alt="Kiting" className="about-image float-left" />
+
+        <h2>Update cycle</h2>
+        <ul>
+          <li><strong>Full model retrain</strong> every few hours - deep learning.</li>
+          <li><strong>On-demand quick updates</strong> when a user requests a fresh run on the Predictions page.</li>
+        </ul>
         
-        <img src={about6} alt="Meeting new friends" className="about-image bottom-wide-image" />
+        <h2>Why it helps</h2>
+        <ul>
+          <li>Emphasizes <strong>short-range forecasting</strong> (the next 1–3 hours), not just daily forecasts.</li>
+          <li>Adjusts quickly to <strong>real observations</strong>, reducing the chance of driving to the spot only to find the wind has dropped.</li>
+        </ul>
+
+        <div className="clearfix"></div>
+        
+        <img src={about3} alt="Kitesurfing community" className="about-image large-center" />
+        
+        <h2>Scalable design</h2>
+        <p>
+          The same pipeline can be deployed to additional stations across Queensland and beyond with minimal setup.
+        </p>
+        
+        <img src={about6} alt="Surfing group" className="about-image medium-center" />
       </div>
     </div>
   );
