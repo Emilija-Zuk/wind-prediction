@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./Predictions.css";
 import WindChart from "../../components/WindChart/WindChart";
+import Button from "../../components/Button/Button";
 import localData from "../../assets/data/data.json";   // current-wind default
 
 const Predictions: React.FC = () => {
@@ -64,6 +65,15 @@ const Predictions: React.FC = () => {
         {forecastData
         ? <WindChart data={forecastData.data} />
         : <p>Loading forecast…</p>}
+
+        <div className="buttons" style={{ marginTop: '2rem' }}>
+          <Button variant="primary" to="/analysis-data">
+            View Prediction Analysis
+          </Button>
+          <Button variant="secondary" to="/">
+            Home Page
+          </Button>
+        </div>
               
       </div>
     </div>

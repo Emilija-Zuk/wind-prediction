@@ -1,26 +1,16 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import Button from "../Button/Button";
 import "./Buttons.css";
 
 const Buttons: React.FC = () => {
-  const navigate = useNavigate();
-
-  const handlePredictionsClick = () => {
-    navigate("/predictions");
-  };
-
-  const handleAnalysisClick = () => {
-    navigate("/analysis-data");
-  };
-
   return (
     <div className="buttons">
-      <button className="btn btn-primary" onClick={handlePredictionsClick}>
+      <Button variant="primary" to="/predictions">
         Explore Predictions
-      </button>
-      <button className="btn btn-secondary" onClick={handleAnalysisClick}>
+      </Button>
+      <Button variant="secondary" to="/analysis-data">
         View Prediction Analysis
-      </button>
+      </Button>
     </div>
   );
 };

@@ -3,6 +3,7 @@ import "./Analysis.css";
 import ErrorChart from "../../components/ErrorChart/ErrorChart";
 import BarChart from "../../components/BarChart/BarChart";
 import ScatterChart from "../../components/ScatterChart/ScatterChart";
+import Button from "../../components/Button/Button";
 
 
 
@@ -206,6 +207,15 @@ const Analysis: React.FC = () => {
             onApply={handleScatterApply}         
           />
         )}
+
+          <div className="buttons" style={{ marginTop: '3rem' }}>
+          <Button variant="primary" to="/predictions">
+            Explore Predictions
+          </Button>
+          <Button variant="secondary" to="/">
+            Home Page
+          </Button>
+        </div>
 
 
       </div>
