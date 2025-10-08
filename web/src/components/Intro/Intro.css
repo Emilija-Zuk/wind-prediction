@@ -17,20 +17,6 @@
   -webkit-text-fill-color: transparent;
 }
 
-/* offset underline*/
-.title-main::after {
-  content: "";
-  position: absolute;
-  left: 100%;
-  transform: translateX(-50%);
-  bottom: -0.45rem;
-  width: 9.5rem;                
-  height: 2px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, #FF8A1A 0%, #FFB55E 100%);
-  box-shadow: 0 1px 0 rgba(0,0,0,.06);
-}
-
 .title-sub {
   font-size: 1.45rem;
   font-weight: 400;
@@ -42,10 +28,5 @@
 
 @media (max-width: 768px) {
   .title-main { font-size: 2.4rem; }
-  .title-main::after {
-    width: 7.5rem;
-    height: 2px;
-    bottom: -0.35rem;
-  }
   .title-sub { font-size: 1.15rem; }
 }

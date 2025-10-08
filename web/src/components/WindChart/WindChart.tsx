@@ -321,12 +321,12 @@ const WindChart: React.FC<WindChartProps> = ({ data, title, className = "" }) =>
       .on("touchmove", showTooltip)
       .on("touchend", () => hideNow());
 
-    // scroll to end on mobile for latest data
+    // scroll to end on mobile 
     if (isMobile && scrollRef.current) {
+      const hasGusts = recentData.some(d => d.windGust > 0);
       setTimeout(() => {
-        if (scrollRef.current) {
-          scrollRef.current.scrollLeft = chartWidth - width;
-        }
+        if (!scrollRef.current) return;
+        scrollRef.current.scrollLeft = hasGusts ? (chartWidth - width) : 0;
       }, 100);
     }
 
