@@ -3,7 +3,7 @@ import "./Logo.css";
 
 const Logo: React.FC = () => (
   <div className="logo-container">
-    <img src="/images/logo.png" alt="Em" className="logo-img" />
+    <img src="/images/logo.svg" alt="Em" className="logo-img" />
   </div>
 );
 
