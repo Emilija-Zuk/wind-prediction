@@ -1,6 +1,8 @@
 import React from "react";
 import "./About.css";
-// Try using require instead of import
+
+import Buttons from "../../components/Buttons/Buttons";
+// require instead of import
 const about1 = require("../../assets/images/about1.jpg");
 const about2 = require("../../assets/images/about2.jpg");
 const about3 = require("../../assets/images/about3.jpg");
@@ -57,6 +59,9 @@ const About: React.FC = () => {
         </p>
         
         <img src={about6} alt="Surfing group" className="about-image medium-center" />
+
+        <div style={{ marginTop: '3rem' }}></div>
+        <Buttons />
       </div>
     </div>
   );
