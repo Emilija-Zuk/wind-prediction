@@ -14,8 +14,8 @@ interface ScatterChartProps {
   onApply?: () => void;
 }
 
-/** Brisbane formatter: "YYYY-MM-DD HH:mm" */
-const fmtPartsBris = new Intl.DateTimeFormat("en-CA", {
+/**  format "YYYY-MM-DD HH:mm" */
+const fmtPartsBris = new Intl.DateTimeFormat("en-AU", {
   timeZone: "Australia/Brisbane",
   year: "numeric",
   month: "2-digit",
@@ -31,7 +31,7 @@ function formatBris(iso: string): string {
     (acc, p) => ((acc[p.type] = p.value), acc),
     {}
   );
-  return `${parts.year}-${parts.month}-${parts.day} ${parts.hour}:${parts.minute}`;
+  return `${parts.day}/${parts.month}/${parts.year} ${parts.hour}:${parts.minute}`;
 }
 
 const ScatterChart: React.FC<ScatterChartProps> = ({

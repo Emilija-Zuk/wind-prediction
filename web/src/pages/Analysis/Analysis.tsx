@@ -7,13 +7,45 @@ import Button from "../../components/Button/Button";
 
 
 
-const fmtBris = (d: Date) =>
-  new Intl.DateTimeFormat("en-CA", { timeZone: "Australia/Brisbane" }).format(d);
+const fmtBris = (d: Date) => {
+  if (!d || isNaN(d.getTime())) {
+    return new Date().toLocaleDateString("en-AU", { 
+      timeZone: "Australia/Brisbane",
+      year: "numeric",
+      month: "2-digit", 
+      day: "2-digit"
+    }).split('/').reverse().join('-'); // convert DD/MM/YYYY to YYYY-MM-DD for input
+  }
+  
+  const formatted = new Intl.DateTimeFormat("en-AU", { 
+    timeZone: "Australia/Brisbane",
+    year: "numeric",
+    month: "2-digit", 
+    day: "2-digit"
+  }).format(d);
+  
+  // convert DD/MM/YYYY to YYYY-MM-DD for date input
+  const [day, month, year] = formatted.split('/');
+  return `${year}-${month}-${day}`;
+};
 
-const addDaysStr = (yyyy_mm_dd: string, delta: number) => {
-  const [y, m, d] = yyyy_mm_dd.split("-").map(Number);
-  const t = Date.UTC(y, m - 1, d + delta);
-  return fmtBris(new Date(t));
+const addDaysStr = (dateStr: string, days: number): string => {
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) {
+      // If invalid date, use today
+      const today = new Date();
+      today.setDate(today.getDate() + days);
+      return fmtBris(today);
+    }
+    d.setDate(d.getDate() + days);
+    return fmtBris(d);
+  } catch (error) {
+    // Fallback to today + days
+    const today = new Date();
+    today.setDate(today.getDate() + days);
+    return fmtBris(today);
+  }
 };
 
 const Analysis: React.FC = () => {
