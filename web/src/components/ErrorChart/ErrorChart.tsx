@@ -56,7 +56,7 @@ const ErrorChart: React.FC<ErrorChartProps> = ({
     clearHideTimer();
     setTooltip((t) => ({ ...t, visible: false }));
   };
-  const scheduleHide = (ms = 1000) => {
+  const scheduleHide = (ms = 3000) => {
     clearHideTimer();
     hideTimer.current = window.setTimeout(() => {
       setTooltip((t) => ({ ...t, visible: false }));
@@ -277,7 +277,7 @@ const ErrorChart: React.FC<ErrorChartProps> = ({
           time: formatToAusDateTime(nearest.time),
         },
       });
-      scheduleHide(1000);
+      scheduleHide(3000);
     }
 
     // svg-level immediate hide behaviors

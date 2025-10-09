@@ -64,7 +64,7 @@ const BarChart: React.FC<BarChartProps> = ({
     clearHideTimer();
     setTooltip((t) => ({ ...t, visible: false }));
   };
-  const scheduleHide = (ms = 1000) => {
+  const scheduleHide = (ms = 3000) => {
     clearHideTimer();
     hideTimer.current = window.setTimeout(() => {
       setTooltip((t) => ({ ...t, visible: false }));
@@ -208,7 +208,7 @@ const BarChart: React.FC<BarChartProps> = ({
       const clientX = event?.clientX ?? event?.touches?.[0]?.clientX ?? 0;
       const clientY = event?.clientY ?? event?.touches?.[0]?.clientY ?? 0;
       setTooltip({ visible: true, x: clientX, y: clientY, d });
-      scheduleHide(1000);
+      scheduleHide(3000);
     };
 
     // Bars
