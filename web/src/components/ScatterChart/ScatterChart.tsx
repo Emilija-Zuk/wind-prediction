@@ -14,8 +14,8 @@ interface ScatterChartProps {
   onApply?: () => void;
 }
 
-/** Brisbane formatter: "YYYY-MM-DD HH:mm" */
-const fmtPartsBris = new Intl.DateTimeFormat("en-CA", {
+/**  format "YYYY-MM-DD HH:mm" */
+const fmtPartsBris = new Intl.DateTimeFormat("en-AU", {
   timeZone: "Australia/Brisbane",
   year: "numeric",
   month: "2-digit",
@@ -31,7 +31,7 @@ function formatBris(iso: string): string {
     (acc, p) => ((acc[p.type] = p.value), acc),
     {}
   );
-  return `${parts.year}-${parts.month}-${parts.day} ${parts.hour}:${parts.minute}`;
+  return `${parts.day}/${parts.month}/${parts.year} ${parts.hour}:${parts.minute}`;
 }
 
 const ScatterChart: React.FC<ScatterChartProps> = ({
@@ -65,7 +65,7 @@ const ScatterChart: React.FC<ScatterChartProps> = ({
     clearHideTimer();
     setTooltip((t) => ({ ...t, visible: false }));
   };
-  const scheduleHide = (ms = 1000) => {
+  const scheduleHide = (ms = 3000) => {
     clearHideTimer();
     hideTimer.current = window.setTimeout(() => {
       setTooltip((t) => ({ ...t, visible: false }));
@@ -221,7 +221,7 @@ const ScatterChart: React.FC<ScatterChartProps> = ({
           y: event.clientY,
           p: { time: d.time, actual: d.a, predicted: d.p, err: d.a - d.p },
         });
-        scheduleHide(1000);
+        scheduleHide(3000);
       })
       .on("mouseleave", () => hideNow())
       .on("touchstart", (event: any, d) => {
@@ -232,7 +232,7 @@ const ScatterChart: React.FC<ScatterChartProps> = ({
           y: touch?.clientY ?? 0,
           p: { time: d.time, actual: d.a, predicted: d.p, err: d.a - d.p },
         });
-        scheduleHide(1000);
+        scheduleHide(3000);
       });
 
     // hide if pointer leaves the whole SVG

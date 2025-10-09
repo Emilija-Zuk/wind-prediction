@@ -2,6 +2,13 @@ import React, { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
 import "./BarChart.css";
 
+// function to format YYYY-MM-DD to DD/MM/YYYY
+const formatToAusDate = (dateStr: string): string => {
+  if (!dateStr || !dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) return dateStr;
+  const [year, month, day] = dateStr.split('-');
+  return `${day}/${month}/${year}`;
+};
+
 type DailyRow = {
   date: string;
   n: number;
@@ -57,7 +64,7 @@ const BarChart: React.FC<BarChartProps> = ({
     clearHideTimer();
     setTooltip((t) => ({ ...t, visible: false }));
   };
-  const scheduleHide = (ms = 1000) => {
+  const scheduleHide = (ms = 3000) => {
     clearHideTimer();
     hideTimer.current = window.setTimeout(() => {
       setTooltip((t) => ({ ...t, visible: false }));
@@ -184,7 +191,11 @@ const BarChart: React.FC<BarChartProps> = ({
           .axisBottom(xCenterScale)
           .tickValues(d3.range(rows.length))
           .tickSizeOuter(0)
-          .tickFormat((i: any) => rows[i].date.slice(5) as any)
+          .tickFormat((i: any) => {
+            const dateStr = rows[i].date; // it gets YYYY-MM-DD format
+            const [year, month, day] = dateStr.split('-');
+            return `${day}/${month}` as any; // Convert to DD/MM format
+          })
       )
       .selectAll("text")
       .style("font-size", "12px");
@@ -197,7 +208,7 @@ const BarChart: React.FC<BarChartProps> = ({
       const clientX = event?.clientX ?? event?.touches?.[0]?.clientX ?? 0;
       const clientY = event?.clientY ?? event?.touches?.[0]?.clientY ?? 0;
       setTooltip({ visible: true, x: clientX, y: clientY, d });
-      scheduleHide(1000);
+      scheduleHide(3000);
     };
 
     // Bars
@@ -290,7 +301,7 @@ const BarChart: React.FC<BarChartProps> = ({
             right: tooltip.x > window.innerWidth / 2 ? window.innerWidth - tooltip.x + 18 : undefined,
           }}
         >
-          <div className="tt-date">{tooltip.d.date}</div>
+          <div className="tt-date">{formatToAusDate(tooltip.d.date)}</div>
           <div>n: <b>{tooltip.d.n}</b> (coverage {(tooltip.d.coverage * 100).toFixed(1)}%)</div>
           <div>MAE: <b>{tooltip.d.mae.toFixed(2)} kn</b></div>
           <div>RMSE: <b>{tooltip.d.rmse.toFixed(2)} kn</b></div>

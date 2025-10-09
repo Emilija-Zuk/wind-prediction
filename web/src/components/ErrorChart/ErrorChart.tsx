@@ -2,6 +2,16 @@ import React, { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
 import "./ErrorChart.css";
 
+// function to format date to Aus format
+const formatToAusDateTime = (date: Date): string => {
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const year = date.getFullYear();
+  const hours = date.getHours().toString().padStart(2, '0');
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+  return `${day}/${month}/${year} ${hours}:${minutes}`;
+};
+
 interface ErrorChartProps {
   data: Array<{ time: string; actual: number; predicted: number }>;
   title?: string;
@@ -46,7 +56,7 @@ const ErrorChart: React.FC<ErrorChartProps> = ({
     clearHideTimer();
     setTooltip((t) => ({ ...t, visible: false }));
   };
-  const scheduleHide = (ms = 1000) => {
+  const scheduleHide = (ms = 3000) => {
     clearHideTimer();
     hideTimer.current = window.setTimeout(() => {
       setTooltip((t) => ({ ...t, visible: false }));
@@ -237,7 +247,7 @@ const ErrorChart: React.FC<ErrorChartProps> = ({
         .attr("y", -5)
         .style("font-size", "13px")
         .style("fill", "gray")
-        .text(d3.timeFormat("%Y-%m-%d")(d));
+        .text(d3.timeFormat("%d/%m/%Y")(d));
     });
 
     // tooltip (nearest)
@@ -264,10 +274,10 @@ const ErrorChart: React.FC<ErrorChartProps> = ({
           actual: Math.round(nearest.actual),
           predicted: Math.round(nearest.predicted),
           error: Math.round(nearest.actual - nearest.predicted),
-          time: d3.timeFormat("%Y-%m-%d %H:%M")(nearest.time),
+          time: formatToAusDateTime(nearest.time),
         },
       });
-      scheduleHide(1000);
+      scheduleHide(3000);
     }
 
     // svg-level immediate hide behaviors
@@ -358,7 +368,7 @@ const ErrorChart: React.FC<ErrorChartProps> = ({
             ...posStyle, // choose left or right and clear the other
           }}
         >
-          <div>Time: <b>{tooltip.data.time}</b></div>
+          <div><b>{tooltip.data.time}</b></div>
           <div>Actual: <b>{tooltip.data.actual} kn</b></div>
           <div>Predicted: <b>{tooltip.data.predicted} kn</b></div>
           <div>Error: <b>{tooltip.data.error} kn</b></div>

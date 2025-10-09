@@ -70,9 +70,16 @@
   margin-top: 10px;
   font-size: 13px;
   color: #444;
-  text-align: center;
+  display: flex;              
+  justify-content: center;    
+  flex-wrap: wrap;            
+  gap: 8px 24px;              
 }
-.bar-legend .legend-item { margin: 0 16px; }
+.bar-legend .legend-item { 
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+}
 
 .legend-swatch {
   display: inline-block;
@@ -108,5 +115,10 @@
     width: calc(100vw - 1rem);
     max-width: calc(100vw - 1rem);
     padding: 0.5rem 0.75rem 0.75rem 0.5rem;
+  }
+  
+  .bar-legend .legend-item:nth-child(2) {
+    flex-basis: 100%;         
+    justify-content: center;
   }
 }
