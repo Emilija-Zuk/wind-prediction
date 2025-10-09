@@ -17,12 +17,45 @@ def lambda_handler(event, context):
     obs = "wind,pressure,wind-gust,rainfall,temperature,apparent-temperature,cloud,delta-t,dew-point,humidity"
     station_id = "18591"   # Gold Coast Seaway
     url = f"{BASE_URL}{api_key}/locations/{station_id}/weather.json"
-    params = {"observationalGraphs": obs, "startDate": today_str}
+    params = {"observationalGraphs": obs}
 
     r = requests.get(url, params=params, timeout=10)
     r.raise_for_status()
     data = r.json()
 
+    # return front end
+    wind_points = data["observationalGraphs"]["wind"]["dataConfig"]["series"]["groups"][0]["points"]
+    gust_points = data["observationalGraphs"]["wind-gust"]["dataConfig"]["series"]["groups"][0]["points"]
+
+    now_utc = datetime.datetime.now(datetime.timezone.utc)
+    cutoff = now_utc - datetime.timedelta(hours=12)
+
+    graph_data = []
+    for i, p in enumerate(wind_points):
+        dt = datetime.datetime.fromtimestamp(p["x"], tz=datetime.timezone.utc)
+        if dt < cutoff:
+            continue
+        gust_val = gust_points[i]["y"] * 0.539957 if i < len(gust_points) else None
+
+        graph_data.append({
+            "x": dt.strftime("%H:%M"),
+            "wind_knots": p["y"] * 0.539957,
+            "direction_degrees": p.get("direction"),
+            "direction_text": p.get("directionText"),
+            "wind_gust_knots": gust_val
+        })
+
+    final_output = {
+        "metadata": {
+            "title": f"{data.get('location', {}).get('name', 'Gold Coast Seaway')} Wind Data",
+            "unit": "knots",
+            "date": now_utc.strftime("%Y-%m-%d")
+        },
+        "data": graph_data
+    }
+
+
+    
     # filter and treat utc as local time
     start = datetime.datetime(today.year, today.month, today.day, 0, 0, 0)
     end   = start + datetime.timedelta(days=1)
@@ -144,36 +177,7 @@ def lambda_handler(event, context):
 
 
 
-    # return front end
-    wind_points = data["observationalGraphs"]["wind"]["dataConfig"]["series"]["groups"][0]["points"]
-    gust_points = data["observationalGraphs"]["wind-gust"]["dataConfig"]["series"]["groups"][0]["points"]
-
-    now_utc = datetime.datetime.now(datetime.timezone.utc)
-    cutoff = now_utc - datetime.timedelta(hours=12)
-
-    graph_data = []
-    for i, p in enumerate(wind_points):
-        dt = datetime.datetime.fromtimestamp(p["x"], tz=datetime.timezone.utc)
-        if dt < cutoff:
-            continue
-        gust_val = gust_points[i]["y"] * 0.539957 if i < len(gust_points) else None
-
-        graph_data.append({
-            "x": dt.strftime("%H:%M"),
-            "wind_knots": p["y"] * 0.539957,
-            "direction_degrees": p.get("direction"),
-            "direction_text": p.get("directionText"),
-            "wind_gust_knots": gust_val
-        })
-
-    final_output = {
-        "metadata": {
-            "title": f"{data.get('location', {}).get('name', 'Gold Coast Seaway')} Wind Data",
-            "unit": "knots",
-            "date": now_utc.strftime("%Y-%m-%d")
-        },
-        "data": graph_data
-    }
+    
 
     return {
         "statusCode": 200,
