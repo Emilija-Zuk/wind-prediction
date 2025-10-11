@@ -1,6 +1,7 @@
 import json, os, datetime, requests, boto3
 from zoneinfo import ZoneInfo
 from bisect import bisect_left
+import datetime
 
 s3 = boto3.resource("s3")
 BASE_URL = "https://api.willyweather.com.au/v2/"
@@ -13,26 +14,50 @@ def lambda_handler(event, context):
     today = now_bris.date()
     today_str = today.strftime("%Y-%m-%d")
 
+    yesterday = (now_bris - datetime.timedelta(days=1)).date()
+    yesterday_str = yesterday.strftime("%Y-%m-%d")
+
     # call api
     obs = "wind,pressure,wind-gust,rainfall,temperature,apparent-temperature,cloud,delta-t,dew-point,humidity"
     station_id = "18591"   # Gold Coast Seaway
     url = f"{BASE_URL}{api_key}/locations/{station_id}/weather.json"
-    params = {"observationalGraphs": obs}
+    params = {"observationalGraphs": obs, "startDate": yesterday_str}
+
 
     r = requests.get(url, params=params, timeout=10)
     r.raise_for_status()
     data = r.json()
 
+    # debugging
+    # s3.Object("record-wind", f"debug.json").put(
+    #     Body=r.text,
+    #     ContentType="application/json"
+    # )
+
     # return front end
-    wind_points = data["observationalGraphs"]["wind"]["dataConfig"]["series"]["groups"][0]["points"]
-    gust_points = data["observationalGraphs"]["wind-gust"]["dataConfig"]["series"]["groups"][0]["points"]
+    # combine yesterday (group[0]) + today (group[-1]) for wind & gust
+    wind_groups = data["observationalGraphs"]["wind"]["dataConfig"]["series"]["groups"]
+    gust_groups = data["observationalGraphs"]["wind-gust"]["dataConfig"]["series"]["groups"]
+
+    # yesterday points
+    wind_points_yest = wind_groups[0]["points"] if len(wind_groups) > 0 else []
+    gust_points_yest = gust_groups[0]["points"] if len(gust_groups) > 0 else []
+
+    # today points 
+    wind_points_today = wind_groups[-1]["points"] if len(wind_groups) > 1 else []
+    gust_points_today = gust_groups[-1]["points"] if len(gust_groups) > 1 else []
+
+    # merged arrays 
+    wind_points = wind_points_yest + wind_points_today
+    gust_points = gust_points_yest + gust_points_today
 
     now_utc = datetime.datetime.now(datetime.timezone.utc)
     cutoff = now_utc - datetime.timedelta(hours=12)
-
+    
     graph_data = []
     for i, p in enumerate(wind_points):
         dt = datetime.datetime.fromtimestamp(p["x"], tz=datetime.timezone.utc)
+
         if dt < cutoff:
             continue
         gust_val = gust_points[i]["y"] * 0.539957 if i < len(gust_points) else None
@@ -83,8 +108,20 @@ def lambda_handler(event, context):
     forecast_bucket = "forecast-wind"
     analysis_bucket = "analysis-wind"
 
-    # use memory data
-    actual_points = data["observationalGraphs"]["wind"]["dataConfig"]["series"]["groups"][0]["points"]
+
+    # filter actual_points to today only for analysis and use memory data
+# pick today's group (WW splits data: group[0]=yesterday, group[1]=today)
+    wind_groups = data["observationalGraphs"]["wind"]["dataConfig"]["series"]["groups"]
+    if len(wind_groups) > 1:
+        today_group = wind_groups[-1]["points"]  # today's data
+    else:
+        today_group = wind_groups[0]["points"]   # fallback if only one group
+
+    # filter for todays points:
+    actual_points = [
+        pt for pt in today_group
+        if start <= datetime.datetime.utcfromtimestamp(pt["x"]) < end
+    ]
 
     # read forecast data  from s3
     forecast_key = f"GC{today_str}.json"

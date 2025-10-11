@@ -47,26 +47,34 @@ const Predictions: React.FC = () => {
   return (
     <div className="predictions-page">
       <div className="page-content">
-
-        <h1>Live Wind Report Gold Coast Seaway</h1>
+        <h1 className="main-title">Gold Coast Seaway</h1>
+        <p className="location-subtitle">Live Wind Data & Forecasts</p>
         
-        <button
-                className="refresh-button"
-                onClick={refreshCurrent}
-                disabled={loading}
-              >
-          {loading ? "Refreshing…" : "Refresh"}
-        </button> 
-
-
+        <h2>Current Wind</h2>
         <WindChart data={chartData.data} />
+        
+        <div className="chart-controls">
+          <button
+            className="refresh-button"
+            onClick={refreshCurrent}
+            disabled={loading}
+          >
+            {loading ? "Refreshing…" : "Refresh"}
+          </button>
+          <p className="chart-hint">Click on the graph for detailed info</p>
+        </div>
 
-        <h1>Forecast Wind</h1>
+        <h2>Wind Forecast</h2>
         {forecastData
-        ? <WindChart data={forecastData.data} />
-        : <p>Loading forecast…</p>}
+          ? (
+            <>
+              <WindChart data={forecastData.data} />
+              <p className="chart-hint" style={{ marginTop: '0.3rem' }}>Click on the graph for detailed info</p>
+            </>
+          )
+          : <p>Loading forecast…</p>}
 
-        <div className="buttons" style={{ marginTop: '2rem' }}>
+        <div className="buttons" style={{ marginTop: '2.5rem' }}>
           <Button variant="primary" to="/analysis-data">
             View Prediction Analysis
           </Button>
