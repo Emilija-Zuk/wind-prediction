@@ -2,11 +2,11 @@ import React, { useState, useEffect } from "react";
 import "./Predictions.css";
 import WindChart from "../../components/WindChart/WindChart";
 import Button from "../../components/Button/Button";
-import localData from "../../assets/data/data.json";   // current-wind default
+import localData from "../../assets/data/data.json";
 
 const Predictions: React.FC = () => {
   // current data
-  const [chartData, setChartData] = useState<any>(localData);
+  const [chartData, setChartData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
 
   // forecast data
@@ -31,8 +31,12 @@ const Predictions: React.FC = () => {
       .finally(() => setLoading(false));
   };
 
-  // load forecast data once when component mounts
+  // load data once when component mounts
   useEffect(() => {
+    // current wind data
+    refreshCurrent();
+    
+    // forecast data
     fetch(forecastUrl, {
       headers: { "x-api-key": process.env.REACT_APP_API_KEY1 as string }
     })
@@ -51,16 +55,18 @@ const Predictions: React.FC = () => {
         <p className="location-subtitle">Live Wind Data & Forecasts</p>
         
         <h2>Current Wind</h2>
-        <WindChart data={chartData.data} />
+        {chartData
+          ? <WindChart data={chartData.data} />
+          : <p>Loading current wind data…</p>}
         
         <div className="chart-controls">
-          <button
+          {/* <button
             className="refresh-button"
             onClick={refreshCurrent}
             disabled={loading}
           >
             {loading ? "Refreshing…" : "Refresh"}
-          </button>
+          </button> */}
           <p className="chart-hint">Click on the graph for detailed info</p>
         </div>
 
