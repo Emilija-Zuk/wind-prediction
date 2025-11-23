@@ -17,6 +17,45 @@ def lambda_handler(event, context):
     yesterday = (now_bris - datetime.timedelta(days=1)).date()
     yesterday_str = yesterday.strftime("%Y-%m-%d")
 
+    # Process other stations (non-GC)
+    other_stations = [
+        ["COOLLY", "18118"], ["HOPE", "39817"], 
+        ["BANANA", "39818"], ["CAPE", "30280"], ["BYRON_MAIN", "19017"]
+    ]
+    
+    obs = "wind,pressure,wind-gust,rainfall,temperature,apparent-temperature,cloud,delta-t,dew-point,humidity"
+    
+    for station_code, station_id in other_stations:
+        try:
+            url = f"{BASE_URL}{api_key}/locations/{station_id}/weather.json"
+            params = {"observationalGraphs": obs, "startDate": yesterday_str}
+            r = requests.get(url, params=params, timeout=10)
+            r.raise_for_status()
+            station_data = r.json()
+            
+            # filter to today's data
+            start = datetime.datetime(today.year, today.month, today.day, 0, 0, 0)
+            end = start + datetime.timedelta(days=1)
+            
+            for graph_name, graph in station_data.get("observationalGraphs", {}).items():
+                for group in graph.get("dataConfig", {}).get("series", {}).get("groups", []):
+                    filtered_points = []
+                    for pt in group.get("points", []):
+                        dt = datetime.datetime.utcfromtimestamp(pt["x"])
+                        if start <= dt < end and dt <= now_bris.replace(tzinfo=None):
+                            filtered_points.append(pt)
+                    group["points"] = filtered_points
+            
+            # Save to S3
+            out_key = f"{station_code}{today_str}.json"
+            s3.Object("record-wind", out_key).put(
+                Body=json.dumps(station_data),
+                ContentType="application/json"
+            )
+        except Exception as e:
+            print(f"Failed to process station {station_code}: {str(e)}")
+            continue
+
     # call api
     obs = "wind,pressure,wind-gust,rainfall,temperature,apparent-temperature,cloud,delta-t,dew-point,humidity"
     station_id = "18591"   # Gold Coast Seaway

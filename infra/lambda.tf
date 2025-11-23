@@ -51,6 +51,7 @@ resource "aws_lambda_function" "lambda1" {
   handler       = "index.lambda_handler" # lambda_handler is specified in index.py. function entry
 
   runtime         = "python3.12"
+  timeout         = 60  # Add this line - 60 seconds timeout
 
   source_code_hash = data.archive_file.lambda1.output_base64sha256
 
